@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "424625054188",
+    "project_id": "lepax-362fe",
+    "storage_bucket": "lepax-362fe.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:424625054188:android:17301e39d24cabcbf7e0c9",
+        "android_client_info": {
+          "package_name": "com.badri.lepax"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBer5NA0SYqMNCLFbVnshoFyqIXInG-b7M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
