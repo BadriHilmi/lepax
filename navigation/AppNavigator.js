@@ -12,6 +12,8 @@ import FreeNowScreen from "../screens/FreeNowScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import PlanDetailScreen from "../screens/PlanDetailScreen";
 import CreatePlanScreen from "../screens/CreatePlanScreen";
+import AddFriendScreen from "../screens/AddFriendScreen";
+import FriendRequestsScreen from "../screens/FriendRequestsScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -81,6 +83,11 @@ export default function AppNavigator() {
             <Stack.Screen name="Main" component={MainTabs} />
             <Stack.Screen name="PlanDetail" component={PlanDetailScreen} />
             <Stack.Screen name="CreatePlan" component={CreatePlanScreen} />
+            <Stack.Screen name="AddFriend" component={AddFriendScreen} />
+            <Stack.Screen
+              name="FriendRequests"
+              component={FriendRequestsScreen}
+            />
           </>
         ) : (
           <Stack.Screen name="Auth" component={AuthScreen} />

@@ -1,19 +1,40 @@
+// firestore.rules
+// Deploy with: firebase deploy --only firestore:rules
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // This rule allows anyone with your Firestore database reference to view, edit,
-    // and delete all data in your Firestore database. It is useful for getting
-    // started, but it is configured to expire after 30 days because it
-    // leaves your app open to attackers. At that time, all client
-    // requests to your Firestore database will be denied.
-    //
-    // Make sure to write security rules for your app before that time, or else
-    // all client requests to your Firestore database will be denied until you Update
-    // your rules
-    match /{document=**} {
-      allow read, write: if request.time < timestamp.date(2026, 4, 11);
+    // Users: authenticated users can read any profile; only owner can write
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth.uid == userId;
+    }
+
+    // Plans: authenticated users can read; only host can delete
+    match /plans/{planId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.hostId == request.auth.uid;
+      allow update: if request.auth != null; // likes, forks, joins
+      allow delete: if request.auth.uid == resource.data.hostId;
+    }
+
+    // Nudges: sender can create; recipient can read and update (mark read)
+    match /nudges/{nudgeId} {
+      allow create: if request.auth != null
+        && request.resource.data.fromUid == request.auth.uid;
+      allow read, update: if request.auth != null
+        && (resource.data.toUid == request.auth.uid
+          || resource.data.fromUid == request.auth.uid);
+    }
+
+    // Friend requests: sender can create; both parties can read/update
+    match /friendRequests/{reqId} {
+      allow create: if request.auth != null
+        && request.resource.data.fromUid == request.auth.uid;
+      allow read, update: if request.auth != null
+        && (resource.data.toUid == request.auth.uid
+          || resource.data.fromUid == request.auth.uid);
     }
   }
 }

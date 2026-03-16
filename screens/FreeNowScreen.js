@@ -32,7 +32,7 @@ const NUDGE_MSGS = [
 ];
 const randMsg = () => NUDGE_MSGS[Math.floor(Math.random() * NUDGE_MSGS.length)];
 
-export default function FreeNowScreen() {
+export default function FreeNowScreen({ navigation }) {
   const { user, profile } = useAuth();
   const [friends, setFriends] = useState([]);
   const [nudgedIds, setNudgedIds] = useState([]);
@@ -104,8 +104,26 @@ export default function FreeNowScreen() {
   return (
     <View style={styles.root}>
       <View style={styles.header}>
-        <Text style={styles.title}>Also free?</Text>
-        <Text style={styles.subtitle}>Friends with no plans today</Text>
+        <View style={styles.headerTop}>
+          <View>
+            <Text style={styles.title}>Also free?</Text>
+            <Text style={styles.subtitle}>Friends with no plans today</Text>
+          </View>
+          <View style={styles.headerActions}>
+            <TouchableOpacity
+              style={styles.headerBtn}
+              onPress={() => navigation.navigate("FriendRequests")}
+            >
+              <Text style={styles.headerBtnText}>Requests</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.headerBtn, styles.headerBtnPrimary]}
+              onPress={() => navigation.navigate("AddFriend")}
+            >
+              <Text style={styles.headerBtnPrimaryText}>+ Add</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
 
       {/* Broadcast */}
@@ -193,6 +211,23 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: C.border,
   },
+  headerTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  headerActions: { flexDirection: "row", gap: 8 },
+  headerBtn: {
+    borderWidth: 1,
+    borderColor: C.border,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 8,
+    backgroundColor: C.surface,
+  },
+  headerBtnText: { fontSize: 13, fontWeight: "600", color: C.text },
+  headerBtnPrimary: { backgroundColor: C.primary, borderColor: C.primary },
+  headerBtnPrimaryText: { fontSize: 13, fontWeight: "700", color: "#fff" },
   title: { fontSize: 22, fontWeight: "700", color: C.text },
   subtitle: { fontSize: 13, color: C.muted, marginTop: 2 },
 
