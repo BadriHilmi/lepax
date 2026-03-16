@@ -23,8 +23,8 @@ import {
 import { db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
 import { C } from "../constants/theme";
-import VibeTag from "../components/x";
 import Avatar from "../components/Avatar";
+import VibeTag from "../components/VibeTag";
 
 export default function PlanDetailScreen({ route, navigation }) {
   const { planId } = route.params;

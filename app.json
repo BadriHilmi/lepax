@@ -13,7 +13,7 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.yourname.lepax"
+      "bundleIdentifier": "com.badri.lepax"
     },
     "android": {
       "adaptiveIcon": {

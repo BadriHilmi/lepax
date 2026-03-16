@@ -19,7 +19,7 @@ import {
 import { db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
 import { C } from "../constants/theme";
-import VibeTag from "../components/x";
+import VibeTag from "../components/VibeTag";
 import Avatar from "../components/Avatar";
 
 function PlanCard({ plan, onPress }) {
