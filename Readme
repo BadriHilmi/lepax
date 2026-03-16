@@ -1,0 +1,205 @@
+# 🌿 Lepax
+
+> **Plan less, lepak more.**
+
+A social hangout app for Malaysians — built to turn casual "anyone free?" into actual plans without the usual group chat chaos.
+
+---
+
+## The problem
+
+You've been there. Someone drops "jom" in the group chat. Five people react. Nobody decides where. The thread dies. Plans fizzle before they start.
+
+Lepax fixes the coordination gap between *wanting to hang out* and *actually hanging out*. Post a plan, see what friends are doing, join or fork someone else's itinerary. No algorithm. No noise. Just plans.
+
+---
+
+## Screenshots
+
+> Coming soon 
+
+---
+
+## Built with
+
+![React Native](https://img.shields.io/badge/React_Native-20232A?style=flat&logo=react&logoColor=61DAFB)
+![Expo](https://img.shields.io/badge/Expo-000020?style=flat&logo=expo&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=flat&logo=firebase&logoColor=black)
+![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=flat&logo=cloudinary&logoColor=white)
+
+| Layer | Tech |
+|---|---|
+| Framework | React Native (Expo) |
+| Auth | Firebase Authentication |
+| Database | Cloud Firestore |
+| Image uploads | Cloudinary (free tier, no billing) |
+| Navigation | React Navigation v7 |
+| State | React Context + hooks |
+
+---
+
+## Features
+
+**Plans as social objects**
+- Create plans with visibility: private, friends-only, or public
+- 4-step creation flow: visibility → when & where → itinerary → vibe tags
+
+**Fork the lepak** *(the gimmick)*
+- Every public plan shows a fork count
+- Fork any plan to copy its full itinerary to your own draft
+- Credit is given to the original host — good planners get recognition
+
+**Friend feed**
+- Chronological, no algorithm
+- See what friends are planning, join with one tap
+
+**Explore**
+- Discover public plans by geo radius: 5km / 20km / 50km / anywhere
+- Filter by vibe: chill, foodie, adventure, budget, spontaneous
+
+**"Also free?" nudges**
+- See which friends have no plans today
+- Send a quick "jom mamak?" nudge or broadcast to everyone at once
+
+**Profiles**
+- Avatar upload via Cloudinary
+- Stats: plans hosted, forks received, friend count
+- Bio editing
+
+---
+
+## What's intentionally NOT in this app
+
+| Skipped | Why |
+|---|---|
+| In-app chat | Use WhatsApp or Telegram — no point competing |
+| Payments | Touch n Go and DuitNow exist |
+| Reviews / ratings | Too transactional, kills the vibe |
+| Algorithmic feed | Chronological is honest |
+| Stories / shorts | Noise, not signal |
+
+---
+
+## Project structure
+
+```
+lepax/
+├── App.js
+├── index.js
+├── app.json
+├── .env.example
+├── firestore.rules
+│
+├── assets/
+├── constants/
+│   └── theme.js          brand colors + vibe config
+├── firebase/
+│   └── config.js         Firebase init (Auth + Firestore only)
+├── context/
+│   └── AuthContext.js    global auth + profile state
+├── components/
+│   ├── Avatar.js
+│   └── VibeTag.js
+├── navigation/
+│   └── AppNavigator.js   stack + bottom tabs
+└── screens/
+    ├── AuthScreen.js         log in / sign up
+    ├── HomeScreen.js         feed (Friends + Explore tabs) + FAB
+    ├── PlanDetailScreen.js   view plan, join, fork
+    ├── CreatePlanScreen.js   4-step plan creation
+    ├── ProfileScreen.js      avatar upload, bio, stats
+    └── FreeNowScreen.js      nudge free friends
+```
+
+---
+
+## Firestore data model
+
+| Collection | Doc ID | Key fields |
+|---|---|---|
+| `users` | `{uid}` | username, email, bio, avatarUrl, friends[], plansHosted, forksReceived |
+| `plans` | auto | title, date, location, visibility, vibes[], itinerary[], hostId, hostUsername, joinedBy[], forks, createdAt |
+| `nudges` | auto | fromUid, fromUsername, toUid, message, read, createdAt |
+
+---
+
+## Running locally
+
+### 1. Clone the repo
+
+```bash
+git clone https://github.com/yourusername/lepax.git
+cd lepax
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Set up Firebase
+
+1. Go to [console.firebase.google.com](https://console.firebase.google.com)
+2. Create a project → enable **Authentication** (Email/Password) and **Firestore**
+3. Project Settings → Add a Web app → copy the config values
+
+### 4. Set up Cloudinary
+
+1. Sign up free at [cloudinary.com](https://cloudinary.com) — no credit card
+2. Note your **Cloud Name** from the dashboard
+3. Settings → Upload → Add upload preset → set to **Unsigned** → folder: `avatars`
+
+### 5. Configure environment
+
+```bash
+cp .env.example .env
+```
+
+Fill in your values:
+
+```env
+EXPO_PUBLIC_FIREBASE_API_KEY=
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=
+EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+EXPO_PUBLIC_FIREBASE_APP_ID=
+
+EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME=
+EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET=
+```
+
+### 6. Run
+
+```bash
+npx expo start
+```
+
+Scan the QR with **Expo Go** on your phone.
+
+---
+
+## What I learned
+
+- Structuring a React Native app with real-time Firestore listeners
+- Managing global auth state with React Context across a multi-screen app
+- Integrating a third-party upload service (Cloudinary) without a backend
+- Designing intentional anti-features — knowing what to leave out is as important as what to build
+- Debugging Metro bundler path issues (lesson: never have spaces in your project folder path 😅)
+
+---
+
+## Roadmap
+
+- [ ] QR code friend adding at meetups
+- [ ] Push notifications for nudges (Expo Notifications + Cloud Functions)
+- [ ] Personal plan template library
+- [ ] Group plans with vote reactions (👍 🤔 ❌)
+- [ ] Map picker for location input
+
+---
+
+## Author
+
+Badri
+Built as a personal portfolio project.
