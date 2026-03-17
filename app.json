@@ -31,7 +31,8 @@
         {
           "photosPermission": "Lepax needs photo access to set your avatar."
         }
-      ]
+      ],
+      "@react-native-community/datetimepicker"
     ]
   }
 }

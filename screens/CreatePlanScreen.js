@@ -15,6 +15,7 @@ import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
 import { C, VIBES } from "../constants/theme";
+import DatePickerInput from "../components/DatePickerInput";
 
 const VISIBILITY_OPTIONS = [
   {
@@ -51,7 +52,7 @@ export default function CreatePlanScreen({ navigation }) {
 
   const [visibility, setVisibility] = useState("friends");
   const [title, setTitle] = useState("");
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState(null);
   const [location, setLocation] = useState("");
   const [itinerary, setItinerary] = useState([
     { time: "", activity: "", location: "" },
@@ -73,7 +74,7 @@ export default function CreatePlanScreen({ navigation }) {
 
   const canNext = () => {
     if (step === 1) return !!visibility;
-    if (step === 2) return title.trim() && date.trim() && location.trim();
+    if (step === 2) return title.trim() && date !== null && location.trim();
     if (step === 3) return itinerary.some((x) => x.activity.trim());
     return true;
   };
@@ -83,7 +84,7 @@ export default function CreatePlanScreen({ navigation }) {
     try {
       await addDoc(collection(db, "plans"), {
         title: title.trim(),
-        date: date.trim(),
+        date: date ? date.toISOString() : "",
         location: location.trim(),
         visibility,
         vibes: selectedVibes,
@@ -185,15 +186,15 @@ export default function CreatePlanScreen({ navigation }) {
                 onChangeText={setTitle}
               />
             </Field>
-            <Field label="Date">
-              <TextInput
-                style={styles.input}
-                placeholder="e.g. Sat 14 Jun · 10am"
-                placeholderTextColor={C.muted}
-                value={date}
-                onChangeText={setDate}
-              />
-            </Field>
+            <DatePickerInput
+              label="Date"
+              value={date}
+              onChange={setDate}
+              mode="datetime"
+              required
+              minimumDate={new Date()}
+              placeholder="Pick a date and time"
+            />
             <Field label="Location">
               <TextInput
                 style={styles.input}

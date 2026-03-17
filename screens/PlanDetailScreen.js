@@ -23,8 +23,8 @@ import {
 import { db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
 import { C } from "../constants/theme";
-import Avatar from "../components/Avatar";
 import VibeTag from "../components/VibeTag";
+import Avatar from "../components/Avatar";
 
 export default function PlanDetailScreen({ route, navigation }) {
   const { planId } = route.params;
@@ -161,7 +161,21 @@ export default function PlanDetailScreen({ route, navigation }) {
         <View style={styles.detailsCard}>
           <DetailRow icon="📍" label="Location" value={plan.location} />
           <View style={styles.divider} />
-          <DetailRow icon="🗓" label="Date" value={plan.date || "TBD"} />
+          <DetailRow
+            icon="🗓"
+            label="Date"
+            value={
+              plan.date
+                ? new Date(plan.date).toLocaleDateString([], {
+                    weekday: "short",
+                    day: "numeric",
+                    month: "short",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "TBD"
+            }
+          />
           <View style={styles.divider} />
           <DetailRow
             icon="👥"

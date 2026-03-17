@@ -16,7 +16,7 @@ import { doc, updateDoc } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import { auth, db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
-import { C } from "../constants/theme";
+import { C, Typography } from "../constants/theme";
 import Avatar from "../components/Avatar";
 
 // ─── Cloudinary config ────────────────────────────────────────────────────────
@@ -235,9 +235,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: C.border,
   },
-  back: { fontSize: 15, color: C.primary, fontWeight: "600" },
-  navTitle: { fontSize: 15, fontWeight: "700", color: C.text },
-  editText: { fontSize: 15, color: C.primary, fontWeight: "600" },
+  back: { fontSize: 15, color: C.primary, fontWeight: Typography.semibold },
+  navTitle: { fontSize: 15, fontWeight: Typography.bold, color: C.text },
+  editText: { fontSize: 15, color: C.primary, fontWeight: Typography.semibold },
 
   content: { padding: 24, gap: 28, paddingBottom: 60 },
 
