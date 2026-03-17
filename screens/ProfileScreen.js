@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   editBadgeIcon: { fontSize: 11, color: C.text },
-  username: { fontSize: 18, fontWeight: "700", color: C.text },
+  username: { fontSize: 18, fontWeight: Typography.bold, color: C.text },
   email: { fontSize: 13, color: C.muted },
 
   statsCard: {
@@ -277,12 +277,16 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   stat: { flex: 1, alignItems: "center", gap: 2 },
-  statValue: { fontSize: 20, fontWeight: "700", color: C.text },
+  statValue: { fontSize: 20, fontWeight: Typography.bold, color: C.text },
   statLabel: { fontSize: 11, color: C.muted, textAlign: "center" },
   statDiv: { width: 1, backgroundColor: C.border },
 
   section: { gap: 10 },
-  sectionLabel: { fontSize: 12, fontWeight: "600", color: C.muted },
+  sectionLabel: {
+    fontSize: 12,
+    fontWeight: Typography.semibold,
+    color: C.muted,
+  },
   bioText: { fontSize: 15, color: C.text, lineHeight: 22 },
   bioInput: {
     backgroundColor: C.surface,
@@ -301,7 +305,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
-  saveBtnText: { color: "#fff", fontWeight: "700", fontSize: 14 },
+  saveBtnText: { color: "#fff", fontWeight: Typography.bold, fontSize: 14 },
 
   logoutBtn: {
     backgroundColor: C.surface,
@@ -311,5 +315,9 @@ const styles = StyleSheet.create({
     padding: 14,
     alignItems: "center",
   },
-  logoutText: { fontSize: 14, fontWeight: "600", color: C.accent },
+  logoutText: {
+    fontSize: 14,
+    fontWeight: Typography.semibold,
+    color: C.accent,
+  },
 });

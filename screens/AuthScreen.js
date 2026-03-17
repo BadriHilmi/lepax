@@ -18,7 +18,7 @@ import {
 } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../firebase/config";
-import { C } from "../constants/theme";
+import { C, Typography } from "../constants/theme";
 
 export default function AuthScreen() {
   const [mode, setMode] = useState("login");
@@ -198,11 +198,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   toggleTabActive: { backgroundColor: C.surface },
-  toggleText: { fontSize: 14, fontWeight: "600", color: C.muted },
+  toggleText: { fontSize: 14, fontWeight: Typography.semibold, color: C.muted },
   toggleTextActive: { color: C.text },
 
   form: { gap: 16 },
-  label: { fontSize: 13, fontWeight: "600", color: C.text },
+  label: { fontSize: 13, fontWeight: Typography.semibold, color: C.text },
   input: {
     backgroundColor: C.surface,
     borderWidth: 1,

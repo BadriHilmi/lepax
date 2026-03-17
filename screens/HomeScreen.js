@@ -18,7 +18,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
-import { C } from "../constants/theme";
+import { C, Typography } from "../constants/theme";
 import VibeTag from "../components/VibeTag";
 import Avatar from "../components/Avatar";
 
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
   nextLabel: {
     fontSize: 11,
     color: "rgba(255,255,255,0.7)",
-    fontWeight: "600",
+    fontWeight: Typography.semibold,
     marginBottom: 3,
   },
   nextTitle: { fontSize: 16, fontWeight: "700", color: "#fff" },
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
   },
   tab: { paddingVertical: 8, paddingHorizontal: 14, borderRadius: 8 },
   tabActive: { backgroundColor: C.sand },
-  tabText: { fontSize: 14, fontWeight: "600", color: C.muted },
+  tabText: { fontSize: 14, fontWeight: Typography.semibold, color: C.muted },
   tabTextActive: { color: C.text },
 
   radii: { paddingHorizontal: 20, paddingBottom: 10, gap: 8 },
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   hostRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  hostName: { fontSize: 13, fontWeight: "600", color: C.primary },
+  hostName: { fontSize: 13, fontWeight: Typography.semibold, color: C.primary },
   mutual: { fontSize: 11, color: C.muted },
   forkBadge: {
     paddingHorizontal: 8,
@@ -327,7 +327,11 @@ const styles = StyleSheet.create({
     backgroundColor: C.sand,
     borderRadius: 6,
   },
-  forkBadgeText: { fontSize: 12, color: C.text, fontWeight: "600" },
+  forkBadgeText: {
+    fontSize: 12,
+    color: C.text,
+    fontWeight: Typography.semibold,
+  },
   cardTitle: {
     fontSize: 17,
     fontWeight: "700",
@@ -361,7 +365,7 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
     borderRadius: 8,
   },
-  forkBtnText: { color: C.text, fontWeight: "600", fontSize: 13 },
+  forkBtnText: { color: C.text, fontWeight: Typography.semibold, fontSize: 13 },
 
   empty: { alignItems: "center", paddingTop: 60, paddingHorizontal: 32 },
   emptyIcon: { fontSize: 36, marginBottom: 12 },

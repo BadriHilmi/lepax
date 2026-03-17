@@ -21,7 +21,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
-import { C } from "../constants/theme";
+import { C, Typography } from "../constants/theme";
 import Avatar from "../components/Avatar";
 
 export default function FriendRequestsScreen({ navigation }) {
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: C.border,
   },
-  back: { fontSize: 15, color: C.primary, fontWeight: "600" },
+  back: { fontSize: 15, color: C.primary, fontWeight: Typography.semibold },
   navTitle: { fontSize: 15, fontWeight: "700", color: C.text },
 
   list: { paddingHorizontal: 20, paddingBottom: 60 },
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   rowLeft: { flexDirection: "row", alignItems: "center", gap: 12, flex: 1 },
-  rowName: { fontSize: 15, fontWeight: "600", color: C.text },
+  rowName: { fontSize: 15, fontWeight: Typography.semibold, color: C.text },
   rowSub: { fontSize: 12, color: C.muted, marginTop: 2 },
   rowActions: { flexDirection: "row", gap: 8, alignItems: "center" },
 
@@ -209,7 +209,11 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 8,
   },
-  declineBtnText: { color: C.muted, fontWeight: "600", fontSize: 13 },
+  declineBtnText: {
+    color: C.muted,
+    fontWeight: Typography.semibold,
+    fontSize: 13,
+  },
 
   empty: { alignItems: "center", paddingTop: 60, paddingHorizontal: 32 },
   emptyIcon: { fontSize: 36, marginBottom: 12 },

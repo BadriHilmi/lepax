@@ -14,7 +14,7 @@ import {
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
-import { C, VIBES } from "../constants/theme";
+import { C, VIBES, Typography } from "../constants/theme";
 import DatePickerInput from "../components/DatePickerInput";
 
 const VISIBILITY_OPTIONS = [
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === "ios" ? 56 : 20,
     paddingBottom: 12,
   },
-  back: { fontSize: 15, color: C.primary, fontWeight: "600" },
+  back: { fontSize: 15, color: C.primary, fontWeight: Typography.semibold },
   navTitle: { fontSize: 15, fontWeight: "700", color: C.text },
   stepCount: { fontSize: 13, color: C.muted, width: 40, textAlign: "right" },
 
@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
   },
   visCardActive: { borderColor: C.primary },
   visIcon: { fontSize: 22 },
-  visLabel: { fontSize: 15, fontWeight: "600", color: C.text },
+  visLabel: { fontSize: 15, fontWeight: Typography.semibold, color: C.text },
   visDesc: { fontSize: 12, color: C.muted, marginTop: 2 },
   radio: {
     width: 20,
@@ -377,7 +377,7 @@ const styles = StyleSheet.create({
   },
 
   form: { gap: 16 },
-  fieldLabel: { fontSize: 13, fontWeight: "600", color: C.text },
+  fieldLabel: { fontSize: 13, fontWeight: Typography.semibold, color: C.text },
   input: {
     backgroundColor: C.surface,
     borderWidth: 1,
@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 4,
   },
-  stopNum: { fontSize: 13, fontWeight: "600", color: C.muted },
+  stopNum: { fontSize: 13, fontWeight: Typography.semibold, color: C.muted },
   removeText: { fontSize: 13, color: C.accent },
   addStopBtn: {
     borderWidth: 1,
@@ -412,7 +412,11 @@ const styles = StyleSheet.create({
     padding: 13,
     alignItems: "center",
   },
-  addStopText: { fontSize: 14, fontWeight: "600", color: C.primary },
+  addStopText: {
+    fontSize: 14,
+    fontWeight: Typography.semibold,
+    color: C.primary,
+  },
 
   vibeHint: { fontSize: 13, color: C.muted },
   vibeGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
@@ -425,7 +429,11 @@ const styles = StyleSheet.create({
     backgroundColor: C.surface,
   },
   vibeChipActive: { backgroundColor: C.primary, borderColor: C.primary },
-  vibeChipText: { fontSize: 14, fontWeight: "600", color: C.text },
+  vibeChipText: {
+    fontSize: 14,
+    fontWeight: Typography.semibold,
+    color: C.text,
+  },
   vibeChipTextActive: { color: "#fff" },
 
   footer: {

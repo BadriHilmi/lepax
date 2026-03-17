@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: C.border,
   },
-  back: { fontSize: 15, color: C.primary, fontWeight: "600" },
+  back: { fontSize: 15, color: C.primary, fontWeight: Typography.semibold },
   navTitle: { fontSize: 15, fontWeight: "700", color: C.text },
 
   searchRow: {
@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
     borderColor: C.border,
   },
   rowLeft: { flexDirection: "row", alignItems: "center", gap: 12, flex: 1 },
-  rowName: { fontSize: 15, fontWeight: "600", color: C.text },
+  rowName: { fontSize: 15, fontWeight: Typography.semibold, color: C.text },
   rowBio: { fontSize: 12, color: C.muted, marginTop: 2, maxWidth: 180 },
 
   addBtn: {
@@ -262,7 +262,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   addBtnSent: { borderColor: C.border, backgroundColor: C.sand },
-  addBtnText: { fontSize: 13, fontWeight: "600", color: C.primary },
+  addBtnText: {
+    fontSize: 13,
+    fontWeight: Typography.semibold,
+    color: C.primary,
+  },
   addBtnTextSent: { color: C.muted },
 
   friendTag: {
@@ -271,7 +275,11 @@ const styles = StyleSheet.create({
     backgroundColor: C.sand,
     borderRadius: 8,
   },
-  friendTagText: { fontSize: 13, fontWeight: "600", color: C.primary },
+  friendTagText: {
+    fontSize: 13,
+    fontWeight: Typography.semibold,
+    color: C.primary,
+  },
 
   hint: { alignItems: "center", paddingTop: 60, gap: 10 },
   hintIcon: { fontSize: 32 },

@@ -20,7 +20,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
-import { C } from "../constants/theme";
+import { C, Typography } from "../constants/theme";
 import Avatar from "../components/Avatar";
 
 const NUDGE_MSGS = [
@@ -225,7 +225,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: C.surface,
   },
-  headerBtnText: { fontSize: 13, fontWeight: "600", color: C.text },
+  headerBtnText: {
+    fontSize: 13,
+    fontWeight: Typography.semibold,
+    color: C.text,
+  },
   headerBtnPrimary: { backgroundColor: C.primary, borderColor: C.primary },
   headerBtnPrimaryText: { fontSize: 13, fontWeight: "700", color: "#fff" },
   title: { fontSize: 22, fontWeight: "700", color: C.text },
@@ -254,7 +258,7 @@ const styles = StyleSheet.create({
     borderColor: C.border,
   },
   rowLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
-  rowName: { fontSize: 14, fontWeight: "600", color: C.text },
+  rowName: { fontSize: 14, fontWeight: Typography.semibold, color: C.text },
   rowStatus: { fontSize: 12, color: C.muted, marginTop: 1 },
 
   nudgeBtn: {
@@ -265,7 +269,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   nudgeBtnDone: { borderColor: C.border, backgroundColor: C.sand },
-  nudgeBtnText: { fontSize: 13, fontWeight: "600", color: C.primary },
+  nudgeBtnText: {
+    fontSize: 13,
+    fontWeight: Typography.semibold,
+    color: C.primary,
+  },
   nudgeBtnTextDone: { color: C.muted },
 
   empty: { alignItems: "center", paddingTop: 48, paddingHorizontal: 32 },

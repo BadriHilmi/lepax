@@ -22,7 +22,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
-import { C } from "../constants/theme";
+import { C, Typography } from "../constants/theme";
 import VibeTag from "../components/VibeTag";
 import Avatar from "../components/Avatar";
 
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: C.border,
   },
-  back: { fontSize: 15, color: C.primary, fontWeight: "600" },
+  back: { fontSize: 15, color: C.primary, fontWeight: Typography.semibold },
   navTitle: { fontSize: 15, fontWeight: "700", color: C.text },
 
   content: { padding: 20, paddingBottom: 120, gap: 24 },
@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
   section: { gap: 10 },
   sectionLabel: {
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: Typography.semibold,
     color: C.muted,
     textTransform: "uppercase",
     letterSpacing: 0.4,
@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
 
   planTitle: { fontSize: 24, fontWeight: "700", color: C.text, lineHeight: 30 },
   hostRow: { flexDirection: "row", alignItems: "center", gap: 10 },
-  hostName: { fontSize: 14, fontWeight: "600", color: C.primary },
+  hostName: { fontSize: 14, fontWeight: Typography.semibold, color: C.primary },
   forkedFrom: { fontSize: 12, color: C.muted, marginTop: 1 },
 
   detailsCard: {
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
   },
   detailIcon: { fontSize: 16, width: 22 },
   detailLabel: { fontSize: 13, color: C.muted, flex: 1 },
-  detailValue: { fontSize: 14, fontWeight: "600", color: C.text },
+  detailValue: { fontSize: 14, fontWeight: Typography.semibold, color: C.text },
   divider: { height: 1, backgroundColor: C.border, marginHorizontal: 14 },
 
   vibesRow: { flexDirection: "row", gap: 8, flexWrap: "wrap" },
@@ -344,10 +344,14 @@ const styles = StyleSheet.create({
   timeTime: {
     fontSize: 11,
     color: C.muted,
-    fontWeight: "600",
+    fontWeight: Typography.semibold,
     marginBottom: 2,
   },
-  timeActivity: { fontSize: 15, fontWeight: "600", color: C.text },
+  timeActivity: {
+    fontSize: 15,
+    fontWeight: Typography.semibold,
+    color: C.text,
+  },
   timeLoc: { fontSize: 12, color: C.muted, marginTop: 2 },
 
   actionBar: {
@@ -380,5 +384,5 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
-  forkBtnText: { color: C.text, fontWeight: "600", fontSize: 15 },
+  forkBtnText: { color: C.text, fontWeight: Typography.semibold, fontSize: 15 },
 });
