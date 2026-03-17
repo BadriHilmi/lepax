@@ -14,6 +14,7 @@ import {
   doc,
   getDoc,
   updateDoc,
+  deleteDoc,
   arrayUnion,
   arrayRemove,
   addDoc,
@@ -25,6 +26,7 @@ import { useAuth } from "../context/AuthContext";
 import { C, Typography } from "../constants/theme";
 import VibeTag from "../components/VibeTag";
 import Avatar from "../components/Avatar";
+import AlertBox from "../components/AlertBox";
 
 export default function PlanDetailScreen({ route, navigation }) {
   const { planId } = route.params;
@@ -33,6 +35,7 @@ export default function PlanDetailScreen({ route, navigation }) {
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState(false);
   const [forking, setForking] = useState(false);
+  const [cancelAlertVisible, setCancelAlertVisible] = useState(false);
 
   useEffect(() => {
     fetchPlan();
@@ -46,7 +49,24 @@ export default function PlanDetailScreen({ route, navigation }) {
   };
 
   const isJoined = plan?.joinedBy?.includes(user?.uid);
+  const isHost = plan?.hostId === user?.uid;
 
+  // ── Delete plan ──────────────────────────────────────────────────────────────
+  const handleDelete = async () => {
+    try {
+      await deleteDoc(doc(db, "plans", planId));
+      navigation.goBack();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // ── Open cancel confirmation ──────────────────────────────────────────────────
+  const handleCancel = () => {
+    setCancelAlertVisible(true);
+  };
+
+  // ── Join / leave ─────────────────────────────────────────────────────────────
   const handleJoin = async () => {
     setJoining(true);
     try {
@@ -68,6 +88,7 @@ export default function PlanDetailScreen({ route, navigation }) {
     }
   };
 
+  // ── Fork plan ─────────────────────────────────────────────────────────────────
   const handleFork = async () => {
     setForking(true);
     try {
@@ -106,6 +127,7 @@ export default function PlanDetailScreen({ route, navigation }) {
     }
   };
 
+  // ── Loading / not found ───────────────────────────────────────────────────────
   if (loading)
     return (
       <View style={styles.center}>
@@ -120,8 +142,10 @@ export default function PlanDetailScreen({ route, navigation }) {
       </View>
     );
 
+  // ── Main render ───────────────────────────────────────────────────────────────
   return (
     <View style={styles.root}>
+      {/* Nav bar */}
       <View style={styles.navBar}>
         <TouchableOpacity
           onPress={() => navigation.goBack()}
@@ -130,9 +154,17 @@ export default function PlanDetailScreen({ route, navigation }) {
           <Text style={styles.back}>← Back</Text>
         </TouchableOpacity>
         <Text style={styles.navTitle}>Plan</Text>
-        <View style={{ width: 60 }} />
+        {isHost ? (
+          <TouchableOpacity
+            onPress={handleCancel}
+            style={{ width: 60, alignItems: "flex-end" }}
+          ></TouchableOpacity>
+        ) : (
+          <View style={{ width: 60 }} />
+        )}
       </View>
 
+      {/* Scrollable content */}
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
@@ -225,37 +257,66 @@ export default function PlanDetailScreen({ route, navigation }) {
 
       {/* Action bar */}
       <View style={styles.actionBar}>
-        <TouchableOpacity
-          style={[styles.joinBtn, isJoined && styles.joinBtnActive]}
-          onPress={handleJoin}
-          disabled={joining}
-          activeOpacity={0.85}
-        >
-          {joining ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.joinBtnText}>
-              {isJoined ? "Joined ✓" : "Join plan"}
-            </Text>
-          )}
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.forkBtn}
-          onPress={handleFork}
-          disabled={forking}
-          activeOpacity={0.85}
-        >
-          {forking ? (
-            <ActivityIndicator color={C.text} />
-          ) : (
-            <Text style={styles.forkBtnText}>⑂ Fork</Text>
-          )}
-        </TouchableOpacity>
+        {isHost ? (
+          <TouchableOpacity
+            style={styles.cancelPlanBtn}
+            onPress={handleCancel}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.cancelPlanBtnText}>CANCEL PLAN</Text>
+          </TouchableOpacity>
+        ) : (
+          <>
+            <TouchableOpacity
+              style={[styles.joinBtn, isJoined && styles.joinBtnActive]}
+              onPress={handleJoin}
+              disabled={joining}
+              activeOpacity={0.85}
+            >
+              {joining ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.joinBtnText}>
+                  {isJoined ? "Joined ✓" : "Join plan"}
+                </Text>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.forkBtn}
+              onPress={handleFork}
+              disabled={forking}
+              activeOpacity={0.85}
+            >
+              {forking ? (
+                <ActivityIndicator color={C.text} />
+              ) : (
+                <Text style={styles.forkBtnText}>⑂ Fork</Text>
+              )}
+            </TouchableOpacity>
+          </>
+        )}
       </View>
+
+      {/* ── AlertBox — cancel plan confirmation ────────────────────────────────── */}
+      <AlertBox
+        visible={cancelAlertVisible}
+        type="confirm"
+        title="Cancel plan?"
+        message="This will permanently delete the plan for everyone."
+        confirmText="Yes, cancel it"
+        cancelText="Keep it"
+        showCancel
+        onConfirm={() => {
+          setCancelAlertVisible(false);
+          handleDelete();
+        }}
+        onCancel={() => setCancelAlertVisible(false)}
+      />
     </View>
   );
 }
 
+// ── Helper ────────────────────────────────────────────────────────────────────
 function DetailRow({ icon, label, value }) {
   return (
     <View style={styles.detailRow}>
@@ -266,6 +327,7 @@ function DetailRow({ icon, label, value }) {
   );
 }
 
+// ── Styles ────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bg },
   center: {
@@ -286,7 +348,12 @@ const styles = StyleSheet.create({
     borderColor: C.border,
   },
   back: { fontSize: 15, color: C.primary, fontWeight: Typography.semibold },
-  navTitle: { fontSize: 15, fontWeight: "700", color: C.text },
+  cancelText: {
+    fontSize: 15,
+    color: C.danger,
+    fontWeight: Typography.semibold,
+  },
+  navTitle: { fontSize: 15, fontWeight: Typography.bold, color: C.text },
 
   content: { padding: 20, paddingBottom: 120, gap: 24 },
 
@@ -295,11 +362,14 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: Typography.semibold,
     color: C.muted,
-    textTransform: "uppercase",
-    letterSpacing: 0.4,
   },
 
-  planTitle: { fontSize: 24, fontWeight: "700", color: C.text, lineHeight: 30 },
+  planTitle: {
+    fontSize: 24,
+    fontWeight: Typography.bold,
+    color: C.text,
+    lineHeight: 30,
+  },
   hostRow: { flexDirection: "row", alignItems: "center", gap: 10 },
   hostName: { fontSize: 14, fontWeight: Typography.semibold, color: C.primary },
   forkedFrom: { fontSize: 12, color: C.muted, marginTop: 1 },
@@ -375,7 +445,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   joinBtnActive: { backgroundColor: "#5A7A4A" },
-  joinBtnText: { color: "#fff", fontWeight: "700", fontSize: 15 },
+  joinBtnText: { color: "#fff", fontWeight: Typography.bold, fontSize: 15 },
   forkBtn: {
     borderWidth: 1,
     borderColor: C.border,
@@ -385,4 +455,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   forkBtnText: { color: C.text, fontWeight: Typography.semibold, fontSize: 15 },
+  cancelPlanBtn: {
+    flex: 1,
+    borderWidth: 2,
+    borderColor: C.danger,
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  cancelPlanBtnText: {
+    color: C.danger,
+    fontWeight: Typography.bold,
+    fontSize: 20,
+  },
 });

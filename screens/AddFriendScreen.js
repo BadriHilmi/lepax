@@ -21,7 +21,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
-import { C } from "../constants/theme";
+import { C, Typography } from "../constants/theme";
 import Avatar from "../components/Avatar";
 
 export default function AddFriendScreen({ navigation }) {
