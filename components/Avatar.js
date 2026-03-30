@@ -1,6 +1,6 @@
 // components/Avatar.js
 import { View, Text, Image, StyleSheet } from "react-native";
-import { C } from "../constants/theme";
+import { C, Typography } from "../constants/theme";
 
 export default function Avatar({ uri, username, size = 40 }) {
   const radius = size / 2;
@@ -34,5 +34,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  letter: { fontWeight: "700", color: C.text },
+  letter: { fontWeight: Typography.bold, color: C.text },
 });
