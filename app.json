@@ -4,6 +4,7 @@
     "slug": "lepax",
     "version": "1.0.0",
     "orientation": "portrait",
+    "entryPoint": "./index.js",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
@@ -13,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.badri.lepax"
+      "bundleIdentifier": "com.yourname.lepax"
     },
     "android": {
       "adaptiveIcon": {
@@ -31,8 +32,7 @@
         {
           "photosPermission": "Lepax needs photo access to set your avatar."
         }
-      ],
-      "@react-native-community/datetimepicker"
+      ]
     ]
   }
 }

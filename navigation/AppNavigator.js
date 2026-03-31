@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Text } from "react-native";
 import { useAuth } from "../context/AuthContext";
-import { C } from "../constants/theme";
+import { C, Typography } from "../constants/theme";
 
 import AuthScreen from "../screens/AuthScreen";
 import HomeScreen from "../screens/HomeScreen";
@@ -38,7 +38,11 @@ function MainTabs() {
         },
         tabBarActiveTintColor: C.primary,
         tabBarInactiveTintColor: C.muted,
-        tabBarLabelStyle: { fontSize: 11, fontWeight: "600", marginBottom: 2 },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: Typography.semibold,
+          marginBottom: 2,
+        },
       }}
     >
       <Tab.Screen

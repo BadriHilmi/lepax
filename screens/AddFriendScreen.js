@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     borderColor: C.border,
   },
   back: { fontSize: 15, color: C.primary, fontWeight: Typography.semibold },
-  navTitle: { fontSize: 15, fontWeight: "700", color: C.text },
+  navTitle: { fontSize: 15, fontWeight: Typography.bold, color: C.text },
 
   searchRow: {
     flexDirection: "row",
@@ -239,7 +239,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     justifyContent: "center",
   },
-  searchBtnText: { color: "#fff", fontWeight: "700", fontSize: 14 },
+  searchBtnText: {
+    color: C.surface,
+    fontWeight: Typography.bold,
+    fontSize: 14,
+  },
 
   list: { paddingHorizontal: 20, paddingBottom: 60 },
   row: {

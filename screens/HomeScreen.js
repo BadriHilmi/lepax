@@ -257,7 +257,12 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   greeting: { fontSize: 13, color: C.muted },
-  headerTitle: { fontSize: 22, fontWeight: "700", color: C.text, marginTop: 2 },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: Typography.bold,
+    color: C.text,
+    marginTop: 2,
+  },
 
   nextStrip: {
     marginHorizontal: 20,
@@ -275,9 +280,9 @@ const styles = StyleSheet.create({
     fontWeight: Typography.semibold,
     marginBottom: 3,
   },
-  nextTitle: { fontSize: 16, fontWeight: "700", color: "#fff" },
+  nextTitle: { fontSize: 16, fontWeight: Typography.bold, color: C.surface },
   nextDate: { fontSize: 12, color: "rgba(255,255,255,0.8)", marginTop: 2 },
-  nextArrow: { fontSize: 20, color: "#fff" },
+  nextArrow: { fontSize: 20, color: C.surface },
 
   tabs: {
     flexDirection: "row",
@@ -300,8 +305,8 @@ const styles = StyleSheet.create({
     backgroundColor: C.surface,
   },
   chipActive: { backgroundColor: C.text, borderColor: C.text },
-  chipText: { fontSize: 13, color: C.muted, fontWeight: "500" },
-  chipTextActive: { color: "#fff" },
+  chipText: { fontSize: 13, color: C.muted, fontWeight: Typography.medium },
+  chipTextActive: { color: C.surface },
 
   feed: { paddingHorizontal: 20, paddingBottom: 100, gap: 12, paddingTop: 8 },
 
@@ -334,7 +339,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 17,
-    fontWeight: "700",
+    fontWeight: Typography.bold,
     color: C.text,
     marginBottom: 8,
   },
@@ -357,7 +362,7 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
     borderRadius: 8,
   },
-  joinBtnText: { color: "#fff", fontWeight: "700", fontSize: 13 },
+  joinBtnText: { color: C.surface, fontWeight: Typography.bold, fontSize: 13 },
   forkBtn: {
     borderWidth: 1,
     borderColor: C.border,
@@ -371,7 +376,7 @@ const styles = StyleSheet.create({
   emptyIcon: { fontSize: 36, marginBottom: 12 },
   emptyTitle: {
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: Typography.bold,
     color: C.text,
     marginBottom: 6,
     textAlign: "center",
@@ -399,5 +404,5 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 4,
   },
-  fabIcon: { fontSize: 26, color: "#fff", lineHeight: 30 },
+  fabIcon: { fontSize: 26, color: C.surface, lineHeight: 30 },
 });

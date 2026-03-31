@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xxl,
     paddingBottom: Spacing.lg,
     alignItems: "center",
-    shadowColor: "#000",
+    shadowColor: C.surface,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.12,
     shadowRadius: 24,
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   btnConfirmText: {
-    color: "#fff",
+    color: C.surface,
     fontSize: Typography.md,
     fontWeight: Typography.bold,
   },

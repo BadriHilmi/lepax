@@ -27,6 +27,7 @@ import { C, Typography } from "../constants/theme";
 import VibeTag from "../components/VibeTag";
 import Avatar from "../components/Avatar";
 import AlertBox from "../components/AlertBox";
+import MapPicker from "../components/MapPicker";
 
 export default function PlanDetailScreen({ route, navigation }) {
   const { planId } = route.params;
@@ -158,7 +159,9 @@ export default function PlanDetailScreen({ route, navigation }) {
           <TouchableOpacity
             onPress={handleCancel}
             style={{ width: 60, alignItems: "flex-end" }}
-          ></TouchableOpacity>
+          >
+            <Text style={styles.cancelText}>Cancel</Text>
+          </TouchableOpacity>
         ) : (
           <View style={{ width: 60 }} />
         )}
@@ -218,6 +221,21 @@ export default function PlanDetailScreen({ route, navigation }) {
           <DetailRow icon="⑂" label="Forks" value={plan.forks ?? 0} />
         </View>
 
+        {/* Map */}
+        {plan.locationCoord && (
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>Location</Text>
+            <MapPicker
+              mode="view"
+              initialCoord={plan.locationCoord}
+              showUserLoc
+              showRoute={!!plan.locationCoord}
+              height={200}
+              markerTitle={plan.location}
+            />
+          </View>
+        )}
+
         {/* Vibes */}
         {plan.vibes?.length > 0 && (
           <View style={styles.section}>
@@ -263,7 +281,7 @@ export default function PlanDetailScreen({ route, navigation }) {
             onPress={handleCancel}
             activeOpacity={0.85}
           >
-            <Text style={styles.cancelPlanBtnText}>CANCEL PLAN</Text>
+            <Text style={styles.cancelPlanBtnText}>Cancel plan</Text>
           </TouchableOpacity>
         ) : (
           <>
@@ -445,7 +463,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   joinBtnActive: { backgroundColor: "#5A7A4A" },
-  joinBtnText: { color: "#fff", fontWeight: Typography.bold, fontSize: 15 },
+  joinBtnText: { color: C.surface, fontWeight: Typography.bold, fontSize: 15 },
   forkBtn: {
     borderWidth: 1,
     borderColor: C.border,
@@ -457,7 +475,7 @@ const styles = StyleSheet.create({
   forkBtnText: { color: C.text, fontWeight: Typography.semibold, fontSize: 15 },
   cancelPlanBtn: {
     flex: 1,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: C.danger,
     padding: 15,
     borderRadius: 10,
@@ -466,6 +484,6 @@ const styles = StyleSheet.create({
   cancelPlanBtnText: {
     color: C.danger,
     fontWeight: Typography.bold,
-    fontSize: 20,
+    fontSize: 15,
   },
 });

@@ -14,8 +14,9 @@ import {
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
-import { C, VIBES, Typography } from "../constants/theme";
+import { C, Typography, VIBES } from "../constants/theme";
 import DatePickerInput from "../components/DatePickerInput";
+import MapPicker from "../components/MapPicker";
 
 const VISIBILITY_OPTIONS = [
   {
@@ -54,6 +55,7 @@ export default function CreatePlanScreen({ navigation }) {
   const [title, setTitle] = useState("");
   const [date, setDate] = useState(null);
   const [location, setLocation] = useState("");
+  const [locationCoord, setLocationCoord] = useState(null);
   const [itinerary, setItinerary] = useState([
     { time: "", activity: "", location: "" },
   ]);
@@ -86,6 +88,7 @@ export default function CreatePlanScreen({ navigation }) {
         title: title.trim(),
         date: date ? date.toISOString() : "",
         location: location.trim(),
+        locationCoord: locationCoord ?? null,
         visibility,
         vibes: selectedVibes,
         itinerary: itinerary.filter((x) => x.activity.trim()),
@@ -195,7 +198,17 @@ export default function CreatePlanScreen({ navigation }) {
               minimumDate={new Date()}
               placeholder="Pick a date and time"
             />
-            <Field label="Location">
+            <Field label="Pin on map">
+              <MapPicker
+                mode="pick"
+                initialCoord={locationCoord}
+                showUserLoc
+                height={220}
+                markerTitle={location || "Plan location"}
+                onLocationPick={(coord) => setLocationCoord(coord)}
+              />
+            </Field>
+            <Field label="Location name">
               <TextInput
                 style={styles.input}
                 placeholder="e.g. Genting Highlands"
@@ -335,14 +348,14 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
   back: { fontSize: 15, color: C.primary, fontWeight: Typography.semibold },
-  navTitle: { fontSize: 15, fontWeight: "700", color: C.text },
+  navTitle: { fontSize: 15, fontWeight: Typography.bold, color: C.text },
   stepCount: { fontSize: 13, color: C.muted, width: 40, textAlign: "right" },
 
   progressTrack: { height: 2, backgroundColor: C.border },
   progressFill: { height: 2, backgroundColor: C.primary },
 
   content: { padding: 24, paddingBottom: 120, gap: 20 },
-  stepTitle: { fontSize: 20, fontWeight: "700", color: C.text },
+  stepTitle: { fontSize: 20, fontWeight: Typography.bold, color: C.text },
 
   visOptions: { gap: 10 },
   visCard: {
@@ -434,7 +447,7 @@ const styles = StyleSheet.create({
     fontWeight: Typography.semibold,
     color: C.text,
   },
-  vibeChipTextActive: { color: "#fff" },
+  vibeChipTextActive: { color: C.surface },
 
   footer: {
     position: "absolute",
@@ -453,5 +466,5 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
-  nextBtnText: { color: "#fff", fontWeight: "700", fontSize: 15 },
+  nextBtnText: { color: C.surface, fontWeight: Typography.bold, fontSize: 15 },
 });

@@ -129,7 +129,7 @@ export const GlobalStyles = StyleSheet.create({
     alignItems: "center",
   },
   btnText: {
-    color: "#fff",
+    color: C.surface,
     fontSize: Typography.lg,
     fontWeight: Typography.bold,
   },

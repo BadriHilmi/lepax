@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
-  saveBtnText: { color: "#fff", fontWeight: Typography.bold, fontSize: 14 },
+  saveBtnText: { color: C.surface, fontWeight: Typography.bold, fontSize: 14 },
 
   logoutBtn: {
     backgroundColor: C.surface,

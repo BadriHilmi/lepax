@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
   brandLeaf: { fontSize: 40, marginBottom: 8 },
   brandName: {
     fontSize: 34,
-    fontWeight: "700",
+    fontWeight: Typography.bold,
     color: C.text,
     letterSpacing: -0.5,
   },
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 4,
   },
-  btnText: { color: "#fff", fontWeight: "700", fontSize: 15 },
+  btnText: { color: C.surface, fontWeight: Typography.bold, fontSize: 15 },
   footNote: {
     textAlign: "center",
     marginTop: 24,

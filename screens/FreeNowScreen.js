@@ -231,8 +231,12 @@ const styles = StyleSheet.create({
     color: C.text,
   },
   headerBtnPrimary: { backgroundColor: C.primary, borderColor: C.primary },
-  headerBtnPrimaryText: { fontSize: 13, fontWeight: "700", color: "#fff" },
-  title: { fontSize: 22, fontWeight: "700", color: C.text },
+  headerBtnPrimaryText: {
+    fontSize: 13,
+    fontWeight: Typography.bold,
+    color: C.surface,
+  },
+  title: { fontSize: 22, fontWeight: Typography.bold, color: C.text },
   subtitle: { fontSize: 13, color: C.muted, marginTop: 2 },
 
   broadcast: {
@@ -244,9 +248,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-  broadcastTitle: { fontSize: 15, fontWeight: "700", color: "#fff" },
+  broadcastTitle: {
+    fontSize: 15,
+    fontWeight: Typography.bold,
+    color: C.surface,
+  },
   broadcastSub: { fontSize: 12, color: "rgba(255,255,255,0.75)", marginTop: 2 },
-  broadcastArrow: { fontSize: 18, color: "#fff" },
+  broadcastArrow: { fontSize: 18, color: C.surface },
 
   list: { paddingHorizontal: 20, paddingBottom: 80 },
   row: {
@@ -280,7 +288,7 @@ const styles = StyleSheet.create({
   emptyIcon: { fontSize: 36, marginBottom: 12 },
   emptyTitle: {
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: Typography.bold,
     color: C.text,
     marginBottom: 6,
   },

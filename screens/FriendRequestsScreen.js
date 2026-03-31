@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     borderColor: C.border,
   },
   back: { fontSize: 15, color: C.primary, fontWeight: Typography.semibold },
-  navTitle: { fontSize: 15, fontWeight: "700", color: C.text },
+  navTitle: { fontSize: 15, fontWeight: Typography.bold, color: C.text },
 
   list: { paddingHorizontal: 20, paddingBottom: 60 },
 
@@ -200,7 +200,11 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 8,
   },
-  acceptBtnText: { color: "#fff", fontWeight: "700", fontSize: 13 },
+  acceptBtnText: {
+    color: C.surface,
+    fontWeight: Typography.bold,
+    fontSize: 13,
+  },
 
   declineBtn: {
     borderWidth: 1,
@@ -219,7 +223,7 @@ const styles = StyleSheet.create({
   emptyIcon: { fontSize: 36, marginBottom: 12 },
   emptyTitle: {
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: Typography.bold,
     color: C.text,
     marginBottom: 6,
   },
