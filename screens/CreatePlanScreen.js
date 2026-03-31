@@ -50,6 +50,7 @@ export default function CreatePlanScreen({ navigation }) {
   const { user, profile } = useAuth();
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
+  const [findingLocation, setFindingLocation] = useState(false);
 
   const [visibility, setVisibility] = useState("friends");
   const [title, setTitle] = useState("");
@@ -81,6 +82,60 @@ export default function CreatePlanScreen({ navigation }) {
     return true;
   };
 
+  const findLocationOnMap = async () => {
+    const query = location.trim();
+    if (!query) {
+      Alert.alert("Missing location", "Enter a location name first.");
+      return;
+    }
+
+    setFindingLocation(true);
+
+    try {
+      const url =
+        "https://nominatim.openstreetmap.org/search?" +
+        `q=${encodeURIComponent(query)}` +
+        "&format=jsonv2&limit=1";
+
+      const res = await fetch(url, {
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to search location");
+      }
+
+      const results = await res.json();
+
+      if (!Array.isArray(results) || results.length === 0) {
+        Alert.alert(
+          "Location not found",
+          "Try a more specific place name, area, or city."
+        );
+        return;
+      }
+
+      const first = results[0];
+      const lat = Number(first.lat);
+      const lon = Number(first.lon);
+
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+        throw new Error("Invalid coordinates returned");
+      }
+
+      setLocationCoord({
+        latitude: lat,
+        longitude: lon,
+      });
+    } catch (err) {
+      Alert.alert("Could not find location", err.message);
+    } finally {
+      setFindingLocation(false);
+    }
+  };
+
   const handleSubmit = async () => {
     setSaving(true);
     try {
@@ -109,7 +164,6 @@ export default function CreatePlanScreen({ navigation }) {
 
   return (
     <View style={styles.root}>
-      {/* Nav */}
       <View style={styles.navBar}>
         <TouchableOpacity
           onPress={() => (step > 1 ? setStep(step - 1) : navigation.goBack())}
@@ -122,7 +176,6 @@ export default function CreatePlanScreen({ navigation }) {
         </Text>
       </View>
 
-      {/* Progress */}
       <View style={styles.progressTrack}>
         <View
           style={[
@@ -139,7 +192,6 @@ export default function CreatePlanScreen({ navigation }) {
       >
         <Text style={styles.stepTitle}>{STEPS[step - 1]}</Text>
 
-        {/* Step 1 — Visibility */}
         {step === 1 && (
           <View style={styles.visOptions}>
             {VISIBILITY_OPTIONS.map((opt) => (
@@ -177,7 +229,6 @@ export default function CreatePlanScreen({ navigation }) {
           </View>
         )}
 
-        {/* Step 2 — When + where */}
         {step === 2 && (
           <View style={styles.form}>
             <Field label="Plan name">
@@ -189,6 +240,7 @@ export default function CreatePlanScreen({ navigation }) {
                 onChangeText={setTitle}
               />
             </Field>
+
             <DatePickerInput
               label="Date"
               value={date}
@@ -198,6 +250,34 @@ export default function CreatePlanScreen({ navigation }) {
               minimumDate={new Date()}
               placeholder="Pick a date and time"
             />
+
+            <Field label="Location name">
+              <TextInput
+                style={styles.input}
+                placeholder="e.g. Genting Highlands"
+                placeholderTextColor={C.muted}
+                value={location}
+                onChangeText={setLocation}
+                onSubmitEditing={findLocationOnMap}
+                returnKeyType="search"
+              />
+            </Field>
+
+            <TouchableOpacity
+              style={[
+                styles.findBtn,
+                findingLocation && styles.findBtnDisabled,
+              ]}
+              onPress={findLocationOnMap}
+              disabled={findingLocation}
+            >
+              {findingLocation ? (
+                <ActivityIndicator color={C.surface} />
+              ) : (
+                <Text style={styles.findBtnText}>Find on map</Text>
+              )}
+            </TouchableOpacity>
+
             <Field label="Pin on map">
               <MapPicker
                 mode="pick"
@@ -208,19 +288,16 @@ export default function CreatePlanScreen({ navigation }) {
                 onLocationPick={(coord) => setLocationCoord(coord)}
               />
             </Field>
-            <Field label="Location name">
-              <TextInput
-                style={styles.input}
-                placeholder="e.g. Genting Highlands"
-                placeholderTextColor={C.muted}
-                value={location}
-                onChangeText={setLocation}
-              />
-            </Field>
+
+            {!!locationCoord && (
+              <Text style={styles.coordHint}>
+                Found: {locationCoord.latitude.toFixed(5)},{" "}
+                {locationCoord.longitude.toFixed(5)}
+              </Text>
+            )}
           </View>
         )}
 
-        {/* Step 3 — Itinerary */}
         {step === 3 && (
           <View style={styles.form}>
             {itinerary.map((item, i) => (
@@ -270,7 +347,6 @@ export default function CreatePlanScreen({ navigation }) {
           </View>
         )}
 
-        {/* Step 4 — Vibes */}
         {step === 4 && (
           <View style={styles.form}>
             <Text style={styles.vibeHint}>Pick up to 3</Text>
@@ -299,7 +375,6 @@ export default function CreatePlanScreen({ navigation }) {
         )}
       </ScrollView>
 
-      {/* Footer */}
       <View style={styles.footer}>
         {step < STEPS.length ? (
           <TouchableOpacity
@@ -399,6 +474,26 @@ const styles = StyleSheet.create({
     padding: 13,
     fontSize: 15,
     color: C.text,
+  },
+
+  findBtn: {
+    backgroundColor: C.primary,
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  findBtnDisabled: {
+    opacity: 0.7,
+  },
+  findBtnText: {
+    color: C.surface,
+    fontWeight: Typography.bold,
+    fontSize: 14,
+  },
+  coordHint: {
+    fontSize: 12,
+    color: C.muted,
+    marginTop: -4,
   },
 
   stopCard: {
