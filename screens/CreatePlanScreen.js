@@ -840,7 +840,7 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: Platform.OS === "ios" ? 36 : 20,
     backgroundColor: C.surface,
-    borderTopWidth: 1,
+    borderTopWidth: 2,
     borderColor: C.border,
   },
   nextBtn: {
