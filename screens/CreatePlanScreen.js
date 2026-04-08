@@ -17,6 +17,7 @@ import { useAuth } from "../context/AuthContext";
 import { C, Typography, VIBES } from "../constants/theme";
 import DatePickerInput from "../components/DatePickerInput";
 import MapPicker from "../components/MapPicker";
+import FormField from "../components/FormField";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -499,7 +500,7 @@ function StepDetails({
 }) {
   return (
     <View style={styles.form}>
-      <Field label="Plan name">
+      <FormField label="Plan name" labelStyle={styles.fieldLabel}>
         <TextInput
           style={styles.input}
           placeholder="e.g. Genting day trip"
@@ -507,7 +508,7 @@ function StepDetails({
           value={title}
           onChangeText={onTitleChange}
         />
-      </Field>
+      </FormField>
 
       <DatePickerInput
         label="Date"
@@ -519,7 +520,7 @@ function StepDetails({
         placeholder="Pick a date and time"
       />
 
-      <Field label="Location name">
+      <FormField label="Location name" labelStyle={styles.fieldLabel}>
         <TextInput
           style={styles.input}
           placeholder="e.g. Genting Highlands"
@@ -560,7 +561,7 @@ function StepDetails({
             ))}
           </View>
         )}
-      </Field>
+      </FormField>
 
       <TouchableOpacity
         style={[styles.findBtn, geocoding && styles.findBtnDisabled]}
@@ -574,7 +575,7 @@ function StepDetails({
         )}
       </TouchableOpacity>
 
-      <Field label="Pin on map">
+      <FormField label="Pin on map" labelStyle={styles.fieldLabel}>
         <MapPicker
           mode="pick"
           initialCoord={locationCoord}
@@ -583,7 +584,7 @@ function StepDetails({
           markerTitle={location || "Plan location"}
           onLocationPick={onMapPick}
         />
-      </Field>
+      </FormField>
 
       {!!locationCoord && (
         <Text style={styles.coordHint}>
@@ -665,15 +666,6 @@ function StepVibes({ selectedVibes, onToggle }) {
           );
         })}
       </View>
-    </View>
-  );
-}
-
-function Field({ label, children }) {
-  return (
-    <View style={{ gap: 6 }}>
-      <Text style={styles.fieldLabel}>{label}</Text>
-      {children}
     </View>
   );
 }
