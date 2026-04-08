@@ -1,5 +1,5 @@
 // screens/ProfileScreen.js
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -12,26 +12,13 @@ import {
   ActivityIndicator,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import {
-  collection,
-  doc,
-  onSnapshot,
-  query,
-  updateDoc,
-  where,
-} from "firebase/firestore";
+import { doc, updateDoc } from "firebase/firestore";
 import { signOut } from "firebase/auth";
 import { auth, db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
 import { C, Typography } from "../constants/theme";
 import Avatar from "../components/Avatar";
 
-// ─── Cloudinary config ────────────────────────────────────────────────────────
-// 1. Sign up free at cloudinary.com (no credit card)
-// 2. Dashboard → Settings → Upload → Add upload preset
-//    • Signing mode: Unsigned
-//    • Folder: avatars
-// 3. Copy your Cloud Name and Upload Preset name into .env
 const CLOUD_NAME = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = process.env.EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
@@ -72,27 +59,6 @@ export default function ProfileScreen({ navigation }) {
   const [editing, setEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [myPlans, setMyPlans] = useState([]);
-  const [loadingPlans, setLoadingPlans] = useState(true);
-
-  useEffect(() => {
-    if (!user?.uid) return;
-
-    const q = query(collection(db, "plans"), where("hostId", "==", user.uid));
-    const unsub = onSnapshot(q, (snap) => {
-      const plans = snap.docs
-        .map((d) => ({ id: d.id, ...d.data() }))
-        .sort(
-          (a, b) =>
-            new Date(b.date || b.createdAt?.toDate?.() || 0) -
-            new Date(a.date || a.createdAt?.toDate?.() || 0)
-        );
-      setMyPlans(plans);
-      setLoadingPlans(false);
-    });
-
-    return unsub;
-  }, [user?.uid]);
 
   const handleAvatarChange = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -136,19 +102,6 @@ export default function ProfileScreen({ navigation }) {
       setSaving(false);
     }
   };
-
-  const getSuggestions = () => {
-    const suggestions = [];
-    if (!profile?.bio) suggestions.push("Add a short bio so others know your vibe.");
-    if (!profile?.avatarUrl) suggestions.push("Upload a profile photo to build trust faster.");
-    if ((myPlans?.length ?? 0) < 2)
-      suggestions.push("Create 1–2 more plans this week to appear in more feeds.");
-    if ((profile?.friends?.length ?? 0) < 3)
-      suggestions.push("Add more friends to make your plans easier to fill.");
-    return suggestions;
-  };
-
-  const suggestions = getSuggestions();
 
   return (
     <View style={styles.root}>
@@ -241,62 +194,6 @@ export default function ProfileScreen({ navigation }) {
             <Text style={styles.bioText}>{profile?.bio || "No bio yet."}</Text>
           )}
         </View>
-
-        {/* My Plans */}
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>Plans you've made</Text>
-          {loadingPlans ? (
-            <ActivityIndicator color={C.primary} />
-          ) : myPlans.length === 0 ? (
-            <Text style={styles.bioText}>No plans yet. Create your first one!</Text>
-          ) : (
-            <View style={styles.planList}>
-              {myPlans.slice(0, 5).map((plan) => (
-                <TouchableOpacity
-                  key={plan.id}
-                  style={styles.planCard}
-                  onPress={() =>
-                    navigation.navigate("PlanDetail", { planId: plan.id })
-                  }
-                  activeOpacity={0.85}
-                >
-                  <View style={styles.planTop}>
-                    <Text style={styles.planTitle}>{plan.title}</Text>
-                    <Text style={styles.planVisibility}>{plan.visibility}</Text>
-                  </View>
-                  <Text style={styles.planMeta}>📍 {plan.location}</Text>
-                  <Text style={styles.planMeta}>
-                    🗓{" "}
-                    {plan.date
-                      ? new Date(plan.date).toLocaleDateString([], {
-                          weekday: "short",
-                          day: "numeric",
-                          month: "short",
-                        })
-                      : "Date TBD"}
-                  </Text>
-                  <Text style={styles.planMeta}>
-                    👥 {plan.joinedBy?.length ?? 0} going · ⑂ {plan.forks ?? 0}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-        </View>
-
-        {/* Suggestions */}
-        {suggestions.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Suggested improvements</Text>
-            <View style={styles.suggestionCard}>
-              {suggestions.map((tip) => (
-                <Text key={tip} style={styles.suggestionText}>
-                  • {tip}
-                </Text>
-              ))}
-            </View>
-          </View>
-        )}
 
         {/* Logout */}
         <TouchableOpacity
@@ -417,46 +314,4 @@ const styles = StyleSheet.create({
     fontWeight: Typography.semibold,
     color: C.accent,
   },
-
-  planList: { gap: 10 },
-  planCard: {
-    backgroundColor: C.surface,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 10,
-    padding: 12,
-    gap: 4,
-  },
-  planTop: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: 10,
-  },
-  planTitle: {
-    flex: 1,
-    fontSize: 15,
-    color: C.text,
-    fontWeight: Typography.semibold,
-  },
-  planVisibility: {
-    textTransform: "capitalize",
-    fontSize: 11,
-    color: C.primary,
-    backgroundColor: C.sand,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 99,
-  },
-  planMeta: { fontSize: 13, color: C.muted },
-
-  suggestionCard: {
-    backgroundColor: C.surface,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 10,
-    padding: 12,
-    gap: 7,
-  },
-  suggestionText: { fontSize: 14, color: C.text, lineHeight: 20 },
 });
