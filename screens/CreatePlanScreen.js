@@ -1,15 +1,15 @@
 // screens/CreatePlanScreen.js
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  Platform,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-  Platform,
-  Alert,
-  ActivityIndicator,
+  View,
 } from "react-native";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase/config";
@@ -17,6 +17,8 @@ import { useAuth } from "../context/AuthContext";
 import { C, Typography, VIBES } from "../constants/theme";
 import DatePickerInput from "../components/DatePickerInput";
 import MapPicker from "../components/MapPicker";
+
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 const VISIBILITY_OPTIONS = [
   {
@@ -46,97 +48,256 @@ const STEPS = [
   "Set the vibe",
 ];
 
+const MALAYSIA_BIAS = { lat: 3.139, lng: 101.6869 };
+const PHOTON_DEBOUNCE_MS = 450;
+const PHOTON_LIMIT = 5;
+
+const makeStopId = () => Math.random().toString(36).slice(2, 8);
+const makeStop = () => ({
+  id: makeStopId(),
+  time: "",
+  activity: "",
+  location: "",
+});
+
+// ─── Photon geocoder (pure, no state) ────────────────────────────────────────
+
+async function fetchPhoton(query) {
+  const url =
+    "https://photon.komoot.io/api/?" +
+    `q=${encodeURIComponent(query)}` +
+    `&limit=${PHOTON_LIMIT}` +
+    "&lang=en" +
+    `&lat=${MALAYSIA_BIAS.lat}` +
+    `&lon=${MALAYSIA_BIAS.lng}`;
+
+  const res = await fetch(url, { headers: { Accept: "application/json" } });
+  if (!res.ok) throw new Error(`Photon ${res.status}`);
+
+  const data = await res.json();
+  const features = Array.isArray(data?.features) ? data.features : [];
+
+  return features
+    .map((feature) => {
+      const coords = feature?.geometry?.coordinates;
+      const props = feature?.properties ?? {};
+
+      if (
+        !Array.isArray(coords) ||
+        coords.length < 2 ||
+        typeof coords[0] !== "number" ||
+        typeof coords[1] !== "number"
+      )
+        return null;
+
+      const parts = [
+        props.name,
+        props.street,
+        props.city ?? props.county ?? props.state,
+        props.postcode,
+        props.country,
+      ].filter(Boolean);
+
+      return {
+        id: `${props.osm_id ?? ""}-${props.osm_type ?? ""}-${coords[0]}-${
+          coords[1]
+        }`,
+        label: parts.join(", ") || "",
+        latitude: coords[1],
+        longitude: coords[0],
+      };
+    })
+    .filter(Boolean);
+}
+
+// ─── Screen ───────────────────────────────────────────────────────────────────
+
 export default function CreatePlanScreen({ navigation }) {
   const { user, profile } = useAuth();
+
   const [step, setStep] = useState(1);
   const [saving, setSaving] = useState(false);
-  const [findingLocation, setFindingLocation] = useState(false);
 
+  // Step 1
   const [visibility, setVisibility] = useState("friends");
+
+  // Step 2
   const [title, setTitle] = useState("");
   const [date, setDate] = useState(null);
   const [location, setLocation] = useState("");
   const [locationCoord, setLocationCoord] = useState(null);
-  const [itinerary, setItinerary] = useState([
-    { time: "", activity: "", location: "" },
-  ]);
+
+  // Step 2 – geocoder UI state
+  const [geocoding, setGeocoding] = useState(false);
+  const [locationResults, setLocationResults] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // Step 3
+  const [itinerary, setItinerary] = useState([makeStop()]);
+
+  // Step 4
   const [selectedVibes, setSelectedVibes] = useState([]);
 
-  const toggleVibe = (v) =>
-    setSelectedVibes((p) =>
-      p.includes(v) ? p.filter((x) => x !== v) : p.length < 3 ? [...p, v] : p
-    );
+  // ── Refs ──────────────────────────────────────────────────────────────────
+  const debounceRef = useRef(null);
+  const abortRef = useRef(null); // AbortController for in-flight fetch
 
-  const updateStop = (i, field, val) =>
-    setItinerary((p) =>
-      p.map((item, idx) => (idx === i ? { ...item, [field]: val } : item))
-    );
+  // ── Cleanup on unmount ────────────────────────────────────────────────────
+  useEffect(() => {
+    return () => {
+      clearTimeout(debounceRef.current);
+      abortRef.current?.abort();
+    };
+  }, []);
 
-  const removeStop = (i) =>
-    setItinerary((p) => p.filter((_, idx) => idx !== i));
+  // ── Geocoder ──────────────────────────────────────────────────────────────
 
-  const canNext = () => {
-    if (step === 1) return !!visibility;
-    if (step === 2) return title.trim() && date !== null && location.trim();
-    if (step === 3) return itinerary.some((x) => x.activity.trim());
-    return true;
-  };
+  const runSearch = useCallback(async (query) => {
+    // Cancel any in-flight request
+    abortRef.current?.abort();
+    abortRef.current = new AbortController();
 
-  const findLocationOnMap = async () => {
-    const query = location.trim();
-    if (!query) {
-      Alert.alert("Missing location", "Enter a location name first.");
+    if (!query.trim()) {
+      setLocationResults([]);
+      setShowSuggestions(false);
+      setGeocoding(false);
       return;
     }
 
-    setFindingLocation(true);
-
+    setGeocoding(true);
     try {
-      const url =
-        "https://nominatim.openstreetmap.org/search?" +
-        `q=${encodeURIComponent(query)}` +
-        "&format=jsonv2&limit=1";
-
-      const res = await fetch(url, {
-        headers: {
-          Accept: "application/json",
-        },
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to search location");
+      const results = await fetchPhoton(query.trim());
+      setLocationResults(results);
+      setShowSuggestions(results.length > 0);
+    } catch (err) {
+      if (err.name !== "AbortError") {
+        console.error("Photon error:", err);
+        setLocationResults([]);
+        setShowSuggestions(false);
       }
+    } finally {
+      setGeocoding(false);
+    }
+  }, []);
 
-      const results = await res.json();
+  // Debounced search on location text change
+  useEffect(() => {
+    if (step !== 2) return;
+    clearTimeout(debounceRef.current);
 
-      if (!Array.isArray(results) || results.length === 0) {
+    if (!location.trim()) {
+      setLocationResults([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    debounceRef.current = setTimeout(
+      () => runSearch(location),
+      PHOTON_DEBOUNCE_MS
+    );
+    return () => clearTimeout(debounceRef.current);
+  }, [location, step, runSearch]);
+
+  const handleLocationChange = useCallback(
+    (text) => {
+      setLocation(text);
+      if (!text.trim()) {
+        setLocationCoord(null);
+        setShowSuggestions(false);
+      } else if (locationResults.length > 0) {
+        setShowSuggestions(true);
+      }
+    },
+    [locationResults.length]
+  );
+
+  const handleSelectSuggestion = useCallback((item) => {
+    setLocation(item.label);
+    setLocationCoord({ latitude: item.latitude, longitude: item.longitude });
+    setLocationResults([]);
+    setShowSuggestions(false);
+  }, []);
+
+  // "Use first result" — runs an immediate (non-debounced) search
+  const handleUseFirstResult = useCallback(async () => {
+    if (!location.trim()) {
+      Alert.alert("Missing location", "Enter a location name first.");
+      return;
+    }
+    clearTimeout(debounceRef.current); // cancel pending debounce
+    await runSearch(location);
+
+    // Read results after the async call — state is updated inside runSearch
+    setLocationResults((prev) => {
+      if (prev.length > 0) {
+        const first = prev[0];
+        setLocation(first.label);
+        setLocationCoord({
+          latitude: first.latitude,
+          longitude: first.longitude,
+        });
+        setShowSuggestions(false);
+      } else {
         Alert.alert(
           "Location not found",
-          "Try a more specific place name, area, or city."
+          "Try a more specific place or venue."
         );
-        return;
       }
+      return prev;
+    });
+  }, [location, runSearch]);
 
-      const first = results[0];
-      const lat = Number(first.lat);
-      const lon = Number(first.lon);
+  const handleMapPick = useCallback((coord) => {
+    setLocationCoord(coord);
+    setShowSuggestions(false);
+  }, []);
 
-      if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
-        throw new Error("Invalid coordinates returned");
-      }
+  // ── Itinerary ─────────────────────────────────────────────────────────────
 
-      setLocationCoord({
-        latitude: lat,
-        longitude: lon,
-      });
-    } catch (err) {
-      Alert.alert("Could not find location", err.message);
-    } finally {
-      setFindingLocation(false);
-    }
-  };
+  const updateStop = useCallback(
+    (id, field, val) =>
+      setItinerary((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, [field]: val } : item))
+      ),
+    []
+  );
 
-  const handleSubmit = async () => {
+  const removeStop = useCallback(
+    (id) => setItinerary((prev) => prev.filter((item) => item.id !== id)),
+    []
+  );
+
+  const addStop = useCallback(
+    () => setItinerary((prev) => [...prev, makeStop()]),
+    []
+  );
+
+  // ── Vibes ─────────────────────────────────────────────────────────────────
+
+  const toggleVibe = useCallback(
+    (v) =>
+      setSelectedVibes((prev) =>
+        prev.includes(v)
+          ? prev.filter((x) => x !== v)
+          : prev.length < 3
+          ? [...prev, v]
+          : prev
+      ),
+    []
+  );
+
+  // ── Validation ────────────────────────────────────────────────────────────
+
+  const canNext = useMemo(() => {
+    if (step === 1) return true; // visibility always has a default
+    if (step === 2) return !!(title.trim() && date !== null && location.trim());
+    if (step === 3) return itinerary.some((x) => x.activity.trim());
+    return true;
+  }, [step, title, date, location, itinerary]);
+
+  // ── Submit ────────────────────────────────────────────────────────────────
+
+  const handleSubmit = useCallback(async () => {
     setSaving(true);
     try {
       await addDoc(collection(db, "plans"), {
@@ -146,27 +307,46 @@ export default function CreatePlanScreen({ navigation }) {
         locationCoord: locationCoord ?? null,
         visibility,
         vibes: selectedVibes,
-        itinerary: itinerary.filter((x) => x.activity.trim()),
+        itinerary: itinerary
+          .filter((x) => x.activity.trim())
+          .map(({ id, ...rest }) => rest), // strip client-only id before saving
         hostId: user.uid,
         hostUsername: profile.username,
-        hostAvatarUrl: profile.avatarUrl || "",
+        hostAvatarUrl: profile.avatarUrl ?? "",
         joinedBy: [user.uid],
         forks: 0,
         createdAt: serverTimestamp(),
       });
       navigation.goBack();
     } catch (err) {
-      Alert.alert("Error", err.message);
+      Alert.alert("Error saving plan", err.message);
     } finally {
       setSaving(false);
     }
-  };
+  }, [
+    title,
+    date,
+    location,
+    locationCoord,
+    visibility,
+    selectedVibes,
+    itinerary,
+    user,
+    profile,
+    navigation,
+  ]);
+
+  // ── Render ────────────────────────────────────────────────────────────────
 
   return (
     <View style={styles.root}>
+      {/* Nav */}
       <View style={styles.navBar}>
         <TouchableOpacity
-          onPress={() => (step > 1 ? setStep(step - 1) : navigation.goBack())}
+          onPress={() =>
+            step > 1 ? setStep((s) => s - 1) : navigation.goBack()
+          }
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Text style={styles.back}>{step > 1 ? "← Back" : "Cancel"}</Text>
         </TouchableOpacity>
@@ -176,6 +356,7 @@ export default function CreatePlanScreen({ navigation }) {
         </Text>
       </View>
 
+      {/* Progress bar */}
       <View style={styles.progressTrack}>
         <View
           style={[
@@ -193,210 +374,296 @@ export default function CreatePlanScreen({ navigation }) {
         <Text style={styles.stepTitle}>{STEPS[step - 1]}</Text>
 
         {step === 1 && (
-          <View style={styles.visOptions}>
-            {VISIBILITY_OPTIONS.map((opt) => (
-              <TouchableOpacity
-                key={opt.value}
-                style={[
-                  styles.visCard,
-                  visibility === opt.value && styles.visCardActive,
-                ]}
-                onPress={() => setVisibility(opt.value)}
-                activeOpacity={0.85}
-              >
-                <Text style={styles.visIcon}>{opt.icon}</Text>
-                <View style={{ flex: 1 }}>
-                  <Text
-                    style={[
-                      styles.visLabel,
-                      visibility === opt.value && { color: C.primary },
-                    ]}
-                  >
-                    {opt.label}
-                  </Text>
-                  <Text style={styles.visDesc}>{opt.desc}</Text>
-                </View>
-                <View
-                  style={[
-                    styles.radio,
-                    visibility === opt.value && styles.radioActive,
-                  ]}
-                >
-                  {visibility === opt.value && <View style={styles.radioDot} />}
-                </View>
-              </TouchableOpacity>
-            ))}
-          </View>
+          <StepVisibility visibility={visibility} onSelect={setVisibility} />
         )}
 
         {step === 2 && (
-          <View style={styles.form}>
-            <Field label="Plan name">
-              <TextInput
-                style={styles.input}
-                placeholder="e.g. Genting day trip"
-                placeholderTextColor={C.muted}
-                value={title}
-                onChangeText={setTitle}
-              />
-            </Field>
-
-            <DatePickerInput
-              label="Date"
-              value={date}
-              onChange={setDate}
-              mode="datetime"
-              required
-              minimumDate={new Date()}
-              placeholder="Pick a date and time"
-            />
-
-            <Field label="Location name">
-              <TextInput
-                style={styles.input}
-                placeholder="e.g. Genting Highlands"
-                placeholderTextColor={C.muted}
-                value={location}
-                onChangeText={setLocation}
-                onSubmitEditing={findLocationOnMap}
-                returnKeyType="search"
-              />
-            </Field>
-
-            <TouchableOpacity
-              style={[
-                styles.findBtn,
-                findingLocation && styles.findBtnDisabled,
-              ]}
-              onPress={findLocationOnMap}
-              disabled={findingLocation}
-            >
-              {findingLocation ? (
-                <ActivityIndicator color={C.surface} />
-              ) : (
-                <Text style={styles.findBtnText}>Find on map</Text>
-              )}
-            </TouchableOpacity>
-
-            <Field label="Pin on map">
-              <MapPicker
-                mode="pick"
-                initialCoord={locationCoord}
-                showUserLoc
-                height={220}
-                markerTitle={location || "Plan location"}
-                onLocationPick={(coord) => setLocationCoord(coord)}
-              />
-            </Field>
-
-            {!!locationCoord && (
-              <Text style={styles.coordHint}>
-                Found: {locationCoord.latitude.toFixed(5)},{" "}
-                {locationCoord.longitude.toFixed(5)}
-              </Text>
-            )}
-          </View>
+          <StepDetails
+            title={title}
+            onTitleChange={setTitle}
+            date={date}
+            onDateChange={setDate}
+            location={location}
+            onLocationChange={handleLocationChange}
+            locationCoord={locationCoord}
+            geocoding={geocoding}
+            locationResults={locationResults}
+            showSuggestions={showSuggestions}
+            onSelectSuggestion={handleSelectSuggestion}
+            onUseFirstResult={handleUseFirstResult}
+            onMapPick={handleMapPick}
+            onLocationFocus={() => {
+              if (locationResults.length > 0) setShowSuggestions(true);
+            }}
+          />
         )}
 
         {step === 3 && (
-          <View style={styles.form}>
-            {itinerary.map((item, i) => (
-              <View key={i} style={styles.stopCard}>
-                <View style={styles.stopHeader}>
-                  <Text style={styles.stopNum}>Stop {i + 1}</Text>
-                  {itinerary.length > 1 && (
-                    <TouchableOpacity onPress={() => removeStop(i)}>
-                      <Text style={styles.removeText}>Remove</Text>
-                    </TouchableOpacity>
-                  )}
-                </View>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Time (e.g. 10:00am)"
-                  placeholderTextColor={C.muted}
-                  value={item.time}
-                  onChangeText={(v) => updateStop(i, "time", v)}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Activity"
-                  placeholderTextColor={C.muted}
-                  value={item.activity}
-                  onChangeText={(v) => updateStop(i, "activity", v)}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Location (optional)"
-                  placeholderTextColor={C.muted}
-                  value={item.location}
-                  onChangeText={(v) => updateStop(i, "location", v)}
-                />
-              </View>
-            ))}
-            <TouchableOpacity
-              style={styles.addStopBtn}
-              onPress={() =>
-                setItinerary((p) => [
-                  ...p,
-                  { time: "", activity: "", location: "" },
-                ])
-              }
-            >
-              <Text style={styles.addStopText}>+ Add stop</Text>
-            </TouchableOpacity>
-          </View>
+          <StepItinerary
+            itinerary={itinerary}
+            onUpdate={updateStop}
+            onRemove={removeStop}
+            onAdd={addStop}
+          />
         )}
 
         {step === 4 && (
-          <View style={styles.form}>
-            <Text style={styles.vibeHint}>Pick up to 3</Text>
-            <View style={styles.vibeGrid}>
-              {VIBES.map((v) => {
-                const on = selectedVibes.includes(v);
-                return (
-                  <TouchableOpacity
-                    key={v}
-                    style={[styles.vibeChip, on && styles.vibeChipActive]}
-                    onPress={() => toggleVibe(v)}
-                  >
-                    <Text
-                      style={[
-                        styles.vibeChipText,
-                        on && styles.vibeChipTextActive,
-                      ]}
-                    >
-                      {v}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          </View>
+          <StepVibes selectedVibes={selectedVibes} onToggle={toggleVibe} />
         )}
       </ScrollView>
 
+      {/* Footer CTA */}
       <View style={styles.footer}>
         {step < STEPS.length ? (
           <TouchableOpacity
-            style={[styles.nextBtn, !canNext() && { opacity: 0.4 }]}
-            onPress={() => setStep(step + 1)}
-            disabled={!canNext()}
+            style={[styles.nextBtn, !canNext && styles.nextBtnDisabled]}
+            onPress={() => setStep((s) => s + 1)}
+            disabled={!canNext}
           >
             <Text style={styles.nextBtnText}>Continue</Text>
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
-            style={styles.nextBtn}
+            style={[styles.nextBtn, saving && styles.nextBtnDisabled]}
             onPress={handleSubmit}
             disabled={saving}
           >
             {saving ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={C.surface} />
             ) : (
               <Text style={styles.nextBtnText}>Post plan</Text>
             )}
           </TouchableOpacity>
         )}
+      </View>
+    </View>
+  );
+}
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function StepVisibility({ visibility, onSelect }) {
+  return (
+    <View style={styles.visOptions}>
+      {VISIBILITY_OPTIONS.map((opt) => (
+        <TouchableOpacity
+          key={opt.value}
+          style={[
+            styles.visCard,
+            visibility === opt.value && styles.visCardActive,
+          ]}
+          onPress={() => onSelect(opt.value)}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.visIcon}>{opt.icon}</Text>
+          <View style={{ flex: 1 }}>
+            <Text
+              style={[
+                styles.visLabel,
+                visibility === opt.value && { color: C.primary },
+              ]}
+            >
+              {opt.label}
+            </Text>
+            <Text style={styles.visDesc}>{opt.desc}</Text>
+          </View>
+          <View
+            style={[
+              styles.radio,
+              visibility === opt.value && styles.radioActive,
+            ]}
+          >
+            {visibility === opt.value && <View style={styles.radioDot} />}
+          </View>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+}
+
+function StepDetails({
+  title,
+  onTitleChange,
+  date,
+  onDateChange,
+  location,
+  onLocationChange,
+  onLocationFocus,
+  locationCoord,
+  geocoding,
+  locationResults,
+  showSuggestions,
+  onSelectSuggestion,
+  onUseFirstResult,
+  onMapPick,
+}) {
+  return (
+    <View style={styles.form}>
+      <Field label="Plan name">
+        <TextInput
+          style={styles.input}
+          placeholder="e.g. Genting day trip"
+          placeholderTextColor={C.muted}
+          value={title}
+          onChangeText={onTitleChange}
+        />
+      </Field>
+
+      <DatePickerInput
+        label="Date"
+        value={date}
+        onChange={onDateChange}
+        mode="datetime"
+        required
+        minimumDate={new Date()}
+        placeholder="Pick a date and time"
+      />
+
+      <Field label="Location name">
+        <TextInput
+          style={styles.input}
+          placeholder="e.g. Genting Highlands"
+          placeholderTextColor={C.muted}
+          value={location}
+          onChangeText={onLocationChange}
+          onFocus={onLocationFocus}
+          onSubmitEditing={onUseFirstResult}
+          returnKeyType="search"
+          autoCorrect={false}
+          autoCapitalize="words"
+        />
+
+        {geocoding && (
+          <View style={styles.inlineSearchState}>
+            <ActivityIndicator size="small" color={C.primary} />
+            <Text style={styles.inlineSearchText}>Searching…</Text>
+          </View>
+        )}
+
+        {showSuggestions && locationResults.length > 0 && (
+          <View style={styles.suggestions}>
+            {locationResults.map((item, idx) => (
+              <TouchableOpacity
+                key={item.id}
+                style={[
+                  styles.suggestionItem,
+                  idx === locationResults.length - 1 &&
+                    styles.suggestionItemLast,
+                ]}
+                activeOpacity={0.8}
+                onPress={() => onSelectSuggestion(item)}
+              >
+                <Text style={styles.suggestionTitle} numberOfLines={2}>
+                  {item.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+      </Field>
+
+      <TouchableOpacity
+        style={[styles.findBtn, geocoding && styles.findBtnDisabled]}
+        onPress={onUseFirstResult}
+        disabled={geocoding}
+      >
+        {geocoding ? (
+          <ActivityIndicator color={C.surface} />
+        ) : (
+          <Text style={styles.findBtnText}>Use first result</Text>
+        )}
+      </TouchableOpacity>
+
+      <Field label="Pin on map">
+        <MapPicker
+          mode="pick"
+          initialCoord={locationCoord}
+          showUserLoc
+          height={220}
+          markerTitle={location || "Plan location"}
+          onLocationPick={onMapPick}
+        />
+      </Field>
+
+      {!!locationCoord && (
+        <Text style={styles.coordHint}>
+          {locationCoord.latitude.toFixed(5)},{" "}
+          {locationCoord.longitude.toFixed(5)}
+        </Text>
+      )}
+    </View>
+  );
+}
+
+function StepItinerary({ itinerary, onUpdate, onRemove, onAdd }) {
+  return (
+    <View style={styles.form}>
+      {itinerary.map((item, i) => (
+        <View key={item.id} style={styles.stopCard}>
+          <View style={styles.stopHeader}>
+            <Text style={styles.stopNum}>Stop {i + 1}</Text>
+            {itinerary.length > 1 && (
+              <TouchableOpacity
+                onPress={() => onRemove(item.id)}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Text style={styles.removeText}>Remove</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+
+          <TextInput
+            style={styles.input}
+            placeholder="Time (e.g. 10:00am)"
+            placeholderTextColor={C.muted}
+            value={item.time}
+            onChangeText={(v) => onUpdate(item.id, "time", v)}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Activity"
+            placeholderTextColor={C.muted}
+            value={item.activity}
+            onChangeText={(v) => onUpdate(item.id, "activity", v)}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Location (optional)"
+            placeholderTextColor={C.muted}
+            value={item.location}
+            onChangeText={(v) => onUpdate(item.id, "location", v)}
+          />
+        </View>
+      ))}
+
+      <TouchableOpacity style={styles.addStopBtn} onPress={onAdd}>
+        <Text style={styles.addStopText}>+ Add stop</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+function StepVibes({ selectedVibes, onToggle }) {
+  return (
+    <View style={styles.form}>
+      <Text style={styles.vibeHint}>Pick up to 3</Text>
+      <View style={styles.vibeGrid}>
+        {VIBES.map((v) => {
+          const on = selectedVibes.includes(v);
+          return (
+            <TouchableOpacity
+              key={v}
+              style={[styles.vibeChip, on && styles.vibeChipActive]}
+              onPress={() => onToggle(v)}
+            >
+              <Text
+                style={[styles.vibeChipText, on && styles.vibeChipTextActive]}
+              >
+                {v}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </View>
   );
@@ -410,6 +677,8 @@ function Field({ label, children }) {
     </View>
   );
 }
+
+// ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bg },
@@ -432,6 +701,7 @@ const styles = StyleSheet.create({
   content: { padding: 24, paddingBottom: 120, gap: 20 },
   stepTitle: { fontSize: 20, fontWeight: Typography.bold, color: C.text },
 
+  // Visibility
   visOptions: { gap: 10 },
   visCard: {
     flexDirection: "row",
@@ -464,6 +734,7 @@ const styles = StyleSheet.create({
     backgroundColor: C.primary,
   },
 
+  // Form
   form: { gap: 16 },
   fieldLabel: { fontSize: 13, fontWeight: Typography.semibold, color: C.text },
   input: {
@@ -476,26 +747,41 @@ const styles = StyleSheet.create({
     color: C.text,
   },
 
+  // Geocoder
+  inlineSearchState: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 8,
+  },
+  inlineSearchText: { fontSize: 12, color: C.muted },
+  suggestions: {
+    marginTop: 8,
+    backgroundColor: C.surface,
+    borderWidth: 1,
+    borderColor: C.border,
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+  suggestionItem: {
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: C.border,
+  },
+  suggestionItemLast: { borderBottomWidth: 0 },
+  suggestionTitle: { fontSize: 14, color: C.text, lineHeight: 20 },
   findBtn: {
     backgroundColor: C.primary,
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: "center",
   },
-  findBtnDisabled: {
-    opacity: 0.7,
-  },
-  findBtnText: {
-    color: C.surface,
-    fontWeight: Typography.bold,
-    fontSize: 14,
-  },
-  coordHint: {
-    fontSize: 12,
-    color: C.muted,
-    marginTop: -4,
-  },
+  findBtnDisabled: { opacity: 0.6 },
+  findBtnText: { color: C.surface, fontWeight: Typography.bold, fontSize: 14 },
+  coordHint: { fontSize: 12, color: C.muted, marginTop: -4 },
 
+  // Itinerary
   stopCard: {
     backgroundColor: C.surface,
     borderRadius: 10,
@@ -526,6 +812,7 @@ const styles = StyleSheet.create({
     color: C.primary,
   },
 
+  // Vibes
   vibeHint: { fontSize: 13, color: C.muted },
   vibeGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   vibeChip: {
@@ -544,6 +831,7 @@ const styles = StyleSheet.create({
   },
   vibeChipTextActive: { color: C.surface },
 
+  // Footer
   footer: {
     position: "absolute",
     bottom: 0,
@@ -561,5 +849,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
+  nextBtnDisabled: { opacity: 0.4 },
   nextBtnText: { color: C.surface, fontWeight: Typography.bold, fontSize: 15 },
 });
