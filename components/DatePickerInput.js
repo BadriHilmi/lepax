@@ -4,6 +4,11 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons as Icon } from "@expo/vector-icons";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { C, Typography, Spacing, BorderRadius } from "../constants/theme";
+import {
+  formatDateDisplay,
+  formatDateTimeDisplay,
+  formatTimeDisplay,
+} from "../utils/date";
 
 const DatePickerInput = ({
   label,
@@ -26,13 +31,11 @@ const DatePickerInput = ({
   };
 
   const formatDate = (date) => {
-    if (!date) return "";
-    const d = new Date(date);
     if (mode === "time") {
-      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      return formatTimeDisplay(date, { hour: "2-digit", minute: "2-digit" });
     }
     if (mode === "datetime") {
-      return d.toLocaleString([], {
+      return formatDateTimeDisplay(date, {
         year: "numeric",
         month: "short",
         day: "numeric",
@@ -40,7 +43,7 @@ const DatePickerInput = ({
         minute: "2-digit",
       });
     }
-    return d.toLocaleDateString([], {
+    return formatDateDisplay(date, {
       year: "numeric",
       month: "short",
       day: "numeric",

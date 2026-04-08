@@ -21,19 +21,7 @@ import { useAuth } from "../context/AuthContext";
 import { C, Typography } from "../constants/theme";
 import VibeTag from "../components/VibeTag";
 import Avatar from "../components/Avatar";
-
-const formatDate = (dateStr) => {
-  if (!dateStr) return "Date TBD";
-  try {
-    return new Date(dateStr).toLocaleDateString([], {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-    });
-  } catch {
-    return dateStr;
-  }
-};
+import { formatDateDisplay } from "../utils/date";
 
 function PlanCard({ plan, onPress }) {
   return (
@@ -65,7 +53,14 @@ function PlanCard({ plan, onPress }) {
 
       <View style={styles.cardMeta}>
         <Text style={styles.cardMetaText}>📍 {plan.location}</Text>
-        <Text style={styles.cardMetaText}>🗓 {formatDate(plan.date)}</Text>
+        <Text style={styles.cardMetaText}>
+          🗓{" "}
+          {formatDateDisplay(
+            plan.date,
+            { weekday: "short", day: "numeric", month: "short" },
+            "Date TBD"
+          )}
+        </Text>
       </View>
 
       <View style={styles.vibes}>
@@ -171,7 +166,12 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.nextLabel}>Your next plan</Text>
             <Text style={styles.nextTitle}>{nextPlan.title}</Text>
             <Text style={styles.nextDate}>
-              {formatDate(nextPlan.date)} · {nextPlan.location}
+              {formatDateDisplay(
+                nextPlan.date,
+                { weekday: "short", day: "numeric", month: "short" },
+                "Date TBD"
+              )}{" "}
+              · {nextPlan.location}
             </Text>
           </View>
           <Text style={styles.nextArrow}>→</Text>

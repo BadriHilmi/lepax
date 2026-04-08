@@ -19,6 +19,7 @@ import {
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../firebase/config";
 import { C, Typography } from "../constants/theme";
+import FormField from "../components/FormField";
 
 export default function AuthScreen() {
   const [mode, setMode] = useState("login");
@@ -98,7 +99,7 @@ export default function AuthScreen() {
 
         <View style={styles.form}>
           {mode === "signup" && (
-            <Field label="Username">
+            <FormField label="Username" labelStyle={styles.label}>
               <TextInput
                 style={styles.input}
                 placeholder="e.g. ali_lepak"
@@ -107,9 +108,9 @@ export default function AuthScreen() {
                 value={username}
                 onChangeText={setUsername}
               />
-            </Field>
+            </FormField>
           )}
-          <Field label="Email">
+          <FormField label="Email" labelStyle={styles.label}>
             <TextInput
               style={styles.input}
               placeholder="you@email.com"
@@ -119,8 +120,8 @@ export default function AuthScreen() {
               value={email}
               onChangeText={setEmail}
             />
-          </Field>
-          <Field label="Password">
+          </FormField>
+          <FormField label="Password" labelStyle={styles.label}>
             <TextInput
               style={styles.input}
               placeholder="min 8 characters"
@@ -129,7 +130,7 @@ export default function AuthScreen() {
               value={password}
               onChangeText={setPassword}
             />
-          </Field>
+          </FormField>
 
           <TouchableOpacity
             style={[styles.btn, loading && { opacity: 0.6 }]}
@@ -152,15 +153,6 @@ export default function AuthScreen() {
         </Text>
       </ScrollView>
     </KeyboardAvoidingView>
-  );
-}
-
-function Field({ label, children }) {
-  return (
-    <View style={{ gap: 6 }}>
-      <Text style={styles.label}>{label}</Text>
-      {children}
-    </View>
   );
 }
 
