@@ -10,7 +10,10 @@ export default function Avatar({ uri, username, size = 40 }) {
     return (
       <Image
         source={{ uri }}
-        style={{ width: size, height: size, borderRadius: radius }}
+        style={[
+          styles.image,
+          { width: size, height: size, borderRadius: radius },
+        ]}
       />
     );
   }
@@ -29,10 +32,16 @@ export default function Avatar({ uri, username, size = 40 }) {
 }
 
 const styles = StyleSheet.create({
+  image: {
+    borderWidth: 2,
+    borderColor: C.surface,
+  },
   fallback: {
-    backgroundColor: C.sand,
+    backgroundColor: C.primary,
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 2,
+    borderColor: C.surface,
   },
-  letter: { fontWeight: Typography.bold, color: C.text },
+  letter: { fontWeight: Typography.bold, color: C.surface },
 });

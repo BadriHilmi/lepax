@@ -10,6 +10,7 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
+import { Ionicons as Icon } from "@expo/vector-icons";
 import {
   collection,
   query,
@@ -148,7 +149,9 @@ export default function FriendRequestsScreen({ navigation }) {
           }}
           ListEmptyComponent={
             <View style={styles.empty}>
-              <Text style={styles.emptyIcon}>👋</Text>
+              <View style={styles.emptyIcon}>
+                <Icon name="mail-open-outline" size={30} color={C.primary} />
+              </View>
               <Text style={styles.emptyTitle}>No pending requests</Text>
               <Text style={styles.emptySub}>
                 When someone adds you, their request will show up here.
@@ -220,7 +223,17 @@ const styles = StyleSheet.create({
   },
 
   empty: { alignItems: "center", paddingTop: 60, paddingHorizontal: 32 },
-  emptyIcon: { fontSize: 36, marginBottom: 12 },
+  emptyIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 18,
+    marginBottom: 12,
+    backgroundColor: C.surfaceWarm,
+    borderWidth: 1,
+    borderColor: C.border,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   emptyTitle: {
     fontSize: 16,
     fontWeight: Typography.bold,

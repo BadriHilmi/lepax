@@ -2,7 +2,8 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Text } from "react-native";
+import { View } from "react-native";
+import { Ionicons as Icon } from "@expo/vector-icons";
 import { useAuth } from "../context/AuthContext";
 import { C, Typography } from "../constants/theme";
 
@@ -18,9 +19,24 @@ import FriendRequestsScreen from "../screens/FriendRequestsScreen";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-function TabIcon({ emoji, focused }) {
+function TabIcon({ name, focused }) {
   return (
-    <Text style={{ fontSize: 20, opacity: focused ? 1 : 0.4 }}>{emoji}</Text>
+    <View
+      style={{
+        width: 32,
+        height: 24,
+        borderRadius: 12,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: focused ? C.surfaceWarm : "transparent",
+      }}
+    >
+      <Icon
+        name={name}
+        size={20}
+        color={focused ? C.primary : C.muted}
+      />
+    </View>
   );
 }
 
@@ -35,6 +51,8 @@ function MainTabs() {
           borderTopColor: C.border,
           elevation: 0,
           shadowOpacity: 0,
+          height: 64,
+          paddingTop: 6,
         },
         tabBarActiveTintColor: C.primary,
         tabBarInactiveTintColor: C.muted,
@@ -50,7 +68,9 @@ function MainTabs() {
         component={HomeScreen}
         options={{
           tabBarLabel: "Home",
-          tabBarIcon: ({ focused }) => <TabIcon emoji="🏠" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon name="map-outline" focused={focused} />
+          ),
         }}
       />
       <Tab.Screen
@@ -58,7 +78,9 @@ function MainTabs() {
         component={FreeNowScreen}
         options={{
           tabBarLabel: "Free now",
-          tabBarIcon: ({ focused }) => <TabIcon emoji="👋" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon name="flash-outline" focused={focused} />
+          ),
         }}
       />
       <Tab.Screen
@@ -66,7 +88,9 @@ function MainTabs() {
         component={ProfileScreen}
         options={{
           tabBarLabel: "Profile",
-          tabBarIcon: ({ focused }) => <TabIcon emoji="👤" focused={focused} />,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon name="person-circle-outline" focused={focused} />
+          ),
         }}
       />
     </Tab.Navigator>

@@ -59,7 +59,7 @@ function buildMapHTML({
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body, #map { width: 100%; height: 100%; background: #E6DCC4; }
+    html, body, #map { width: 100%; height: 100%; background: #E9DAB9; }
     .leaflet-control-attribution { display: none !important; }
     .leaflet-container { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
   </style>
@@ -86,7 +86,7 @@ function buildMapHTML({
 
       var greenIcon = L.divIcon({
         className: "",
-        html: '<div style="width:28px;height:28px;border-radius:50% 50% 50% 0;background:#7C9A6B;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.25);transform:rotate(-45deg);"></div>',
+        html: '<div style="width:28px;height:28px;border-radius:50% 50% 50% 0;background:#17766A;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.25);transform:rotate(-45deg);"></div>',
         iconSize: [28, 28],
         iconAnchor: [14, 28],
         popupAnchor: [0, -30],
@@ -94,7 +94,7 @@ function buildMapHTML({
 
       var accentIcon = L.divIcon({
         className: "",
-        html: '<div style="width:28px;height:28px;border-radius:50% 50% 50% 0;background:#D4847C;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.25);transform:rotate(-45deg);"></div>',
+        html: '<div style="width:28px;height:28px;border-radius:50% 50% 50% 0;background:#E4572E;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.25);transform:rotate(-45deg);"></div>',
         iconSize: [28, 28],
         iconAnchor: [14, 28],
         popupAnchor: [0, -30],
@@ -102,7 +102,7 @@ function buildMapHTML({
 
       var userIcon = L.divIcon({
         className: "",
-        html: '<div style="width:16px;height:16px;border-radius:50%;background:#4A90D9;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>',
+        html: '<div style="width:16px;height:16px;border-radius:50%;background:#46B6B0;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>',
         iconSize: [16, 16],
         iconAnchor: [8, 8],
       });
@@ -156,7 +156,7 @@ function buildMapHTML({
         window.__LEPAX_ROUTE_LINE__ = L.polyline(
           [[startLat, startLng], [endLat, endLng]],
           {
-            color: "#7C9A6B",
+            color: "#17766A",
             weight: 3,
             dashArray: "8, 6",
             opacity: 0.85,

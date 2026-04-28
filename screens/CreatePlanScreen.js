@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Ionicons as Icon } from "@expo/vector-icons";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
@@ -26,19 +27,19 @@ const VISIBILITY_OPTIONS = [
     value: "private",
     label: "Just me",
     desc: "Invite people manually",
-    icon: "🔒",
+    icon: "lock-closed-outline",
   },
   {
     value: "friends",
     label: "Friends",
     desc: "Visible to your friends",
-    icon: "👥",
+    icon: "people-outline",
   },
   {
     value: "public",
     label: "Public",
     desc: "Anyone can discover it",
-    icon: "🌏",
+    icon: "earth-outline",
   },
 ];
 
@@ -63,7 +64,7 @@ const makeStop = () => ({
 
 // ─── Photon geocoder (pure, no state) ────────────────────────────────────────
 
-async function fetchPhoton(query) {
+async function fetchPhoton(query, signal) {
   const url =
     "https://photon.komoot.io/api/?" +
     `q=${encodeURIComponent(query)}` +
@@ -72,7 +73,10 @@ async function fetchPhoton(query) {
     `&lat=${MALAYSIA_BIAS.lat}` +
     `&lon=${MALAYSIA_BIAS.lng}`;
 
-  const res = await fetch(url, { headers: { Accept: "application/json" } });
+  const res = await fetch(url, {
+    headers: { Accept: "application/json" },
+    signal,
+  });
   if (!res.ok) throw new Error(`Photon ${res.status}`);
 
   const data = await res.json();
@@ -156,28 +160,34 @@ export default function CreatePlanScreen({ navigation }) {
   const runSearch = useCallback(async (query) => {
     // Cancel any in-flight request
     abortRef.current?.abort();
-    abortRef.current = new AbortController();
+    const controller = new AbortController();
+    abortRef.current = controller;
 
-    if (!query.trim()) {
+    const trimmed = query.trim();
+    if (!trimmed) {
       setLocationResults([]);
       setShowSuggestions(false);
       setGeocoding(false);
-      return;
+      return [];
     }
 
     setGeocoding(true);
     try {
-      const results = await fetchPhoton(query.trim());
+      const results = await fetchPhoton(trimmed, controller.signal);
       setLocationResults(results);
       setShowSuggestions(results.length > 0);
+      return results;
     } catch (err) {
       if (err.name !== "AbortError") {
         console.error("Photon error:", err);
         setLocationResults([]);
         setShowSuggestions(false);
       }
+      return [];
     } finally {
-      setGeocoding(false);
+      if (abortRef.current === controller) {
+        setGeocoding(false);
+      }
     }
   }, []);
 
@@ -226,26 +236,20 @@ export default function CreatePlanScreen({ navigation }) {
       return;
     }
     clearTimeout(debounceRef.current); // cancel pending debounce
-    await runSearch(location);
+    const results = await runSearch(location);
+    const first = results[0];
 
-    // Read results after the async call — state is updated inside runSearch
-    setLocationResults((prev) => {
-      if (prev.length > 0) {
-        const first = prev[0];
-        setLocation(first.label);
-        setLocationCoord({
-          latitude: first.latitude,
-          longitude: first.longitude,
-        });
-        setShowSuggestions(false);
-      } else {
-        Alert.alert(
-          "Location not found",
-          "Try a more specific place or venue."
-        );
-      }
-      return prev;
-    });
+    if (first) {
+      setLocation(first.label);
+      setLocationCoord({
+        latitude: first.latitude,
+        longitude: first.longitude,
+      });
+      setLocationResults([]);
+      setShowSuggestions(false);
+    } else {
+      Alert.alert("Location not found", "Try a more specific place or venue.");
+    }
   }, [location, runSearch]);
 
   const handleMapPick = useCallback((coord) => {
@@ -456,7 +460,18 @@ function StepVisibility({ visibility, onSelect }) {
           onPress={() => onSelect(opt.value)}
           activeOpacity={0.85}
         >
-          <Text style={styles.visIcon}>{opt.icon}</Text>
+          <View
+            style={[
+              styles.visIcon,
+              visibility === opt.value && styles.visIconActive,
+            ]}
+          >
+            <Icon
+              name={opt.icon}
+              size={20}
+              color={visibility === opt.value ? C.surface : C.primary}
+            />
+          </View>
           <View style={{ flex: 1 }}>
             <Text
               style={[
@@ -571,7 +586,10 @@ function StepDetails({
         {geocoding ? (
           <ActivityIndicator color={C.surface} />
         ) : (
-          <Text style={styles.findBtnText}>Use first result</Text>
+          <View style={styles.findBtnContent}>
+            <Icon name="navigate-outline" size={17} color={C.surface} />
+            <Text style={styles.findBtnText}>Use first result</Text>
+          </View>
         )}
       </TouchableOpacity>
 
@@ -706,7 +724,20 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   visCardActive: { borderColor: C.primary },
-  visIcon: { fontSize: 22 },
+  visIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: C.surfaceWarm,
+    borderWidth: 1,
+    borderColor: C.border,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  visIconActive: {
+    backgroundColor: C.primary,
+    borderColor: C.primary,
+  },
   visLabel: { fontSize: 15, fontWeight: Typography.semibold, color: C.text },
   visDesc: { fontSize: 12, color: C.muted, marginTop: 2 },
   radio: {
@@ -770,6 +801,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   findBtnDisabled: { opacity: 0.6 },
+  findBtnContent: { flexDirection: "row", alignItems: "center", gap: 7 },
   findBtnText: { color: C.surface, fontWeight: Typography.bold, fontSize: 14 },
   coordHint: { fontSize: 12, color: C.muted, marginTop: -4 },
 

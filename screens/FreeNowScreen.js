@@ -10,6 +10,7 @@ import {
   Platform,
   Alert,
 } from "react-native";
+import { Ionicons as Icon } from "@expo/vector-icons";
 import {
   collection,
   query,
@@ -114,13 +115,13 @@ export default function FreeNowScreen({ navigation }) {
               style={styles.headerBtn}
               onPress={() => navigation.navigate("FriendRequests")}
             >
-              <Text style={styles.headerBtnText}>Requests</Text>
+              <Icon name="mail-outline" size={18} color={C.text} />
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.headerBtn, styles.headerBtnPrimary]}
               onPress={() => navigation.navigate("AddFriend")}
             >
-              <Text style={styles.headerBtnPrimaryText}>+ Add</Text>
+              <Icon name="person-add-outline" size={18} color={C.surface} />
             </TouchableOpacity>
           </View>
         </View>
@@ -138,7 +139,9 @@ export default function FreeNowScreen({ navigation }) {
             Nudge all free friends at once
           </Text>
         </View>
-        <Text style={styles.broadcastArrow}>→</Text>
+        <View style={styles.broadcastArrow}>
+          <Icon name="send-outline" size={18} color={C.ink} />
+        </View>
       </TouchableOpacity>
 
       <FlatList
@@ -181,7 +184,9 @@ export default function FreeNowScreen({ navigation }) {
         ListEmptyComponent={
           !loading && (
             <View style={styles.empty}>
-              <Text style={styles.emptyIcon}>👥</Text>
+              <View style={styles.emptyIcon}>
+                <Icon name="people-outline" size={30} color={C.primary} />
+              </View>
               <Text style={styles.emptyTitle}>No friends yet</Text>
               <Text style={styles.emptySub}>
                 Add friends by username or share your QR at your next lepak.
@@ -193,7 +198,7 @@ export default function FreeNowScreen({ navigation }) {
 
       <View style={styles.chatNote}>
         <Text style={styles.chatNoteText}>
-          💬 For actual chatting, use WhatsApp or Telegram — Lepax keeps it
+          For actual chatting, use WhatsApp or Telegram — Lepax keeps it
           simple.
         </Text>
       </View>
@@ -224,24 +229,16 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
     borderRadius: 8,
     backgroundColor: C.surface,
-  },
-  headerBtnText: {
-    fontSize: 13,
-    fontWeight: Typography.semibold,
-    color: C.text,
+    minWidth: 42,
+    alignItems: "center",
   },
   headerBtnPrimary: { backgroundColor: C.primary, borderColor: C.primary },
-  headerBtnPrimaryText: {
-    fontSize: 13,
-    fontWeight: Typography.bold,
-    color: C.surface,
-  },
   title: { fontSize: 22, fontWeight: Typography.bold, color: C.text },
   subtitle: { fontSize: 13, color: C.muted, marginTop: 2 },
 
   broadcast: {
     margin: 20,
-    backgroundColor: C.primary,
+    backgroundColor: C.ink,
     borderRadius: 10,
     padding: 16,
     flexDirection: "row",
@@ -254,7 +251,14 @@ const styles = StyleSheet.create({
     color: C.surface,
   },
   broadcastSub: { fontSize: 12, color: "rgba(255,255,255,0.75)", marginTop: 2 },
-  broadcastArrow: { fontSize: 18, color: C.surface },
+  broadcastArrow: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: C.sun,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 
   list: { paddingHorizontal: 20, paddingBottom: 80 },
   row: {
@@ -285,7 +289,17 @@ const styles = StyleSheet.create({
   nudgeBtnTextDone: { color: C.muted },
 
   empty: { alignItems: "center", paddingTop: 48, paddingHorizontal: 32 },
-  emptyIcon: { fontSize: 36, marginBottom: 12 },
+  emptyIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 18,
+    marginBottom: 12,
+    backgroundColor: C.surfaceWarm,
+    borderWidth: 1,
+    borderColor: C.border,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   emptyTitle: {
     fontSize: 16,
     fontWeight: Typography.bold,

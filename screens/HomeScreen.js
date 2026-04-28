@@ -9,6 +9,7 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
+import { Ionicons as Icon } from "@expo/vector-icons";
 import {
   collection,
   query,
@@ -44,7 +45,8 @@ function PlanCard({ plan, onPress }) {
         </View>
         {plan.forks > 0 && (
           <View style={styles.forkBadge}>
-            <Text style={styles.forkBadgeText}>⑂ {plan.forks}</Text>
+            <Icon name="git-branch-outline" size={12} color={C.text} />
+            <Text style={styles.forkBadgeText}>{plan.forks}</Text>
           </View>
         )}
       </View>
@@ -52,15 +54,22 @@ function PlanCard({ plan, onPress }) {
       <Text style={styles.cardTitle}>{plan.title}</Text>
 
       <View style={styles.cardMeta}>
-        <Text style={styles.cardMetaText}>📍 {plan.location}</Text>
-        <Text style={styles.cardMetaText}>
-          🗓{" "}
-          {formatDateDisplay(
-            plan.date,
-            { weekday: "short", day: "numeric", month: "short" },
-            "Date TBD"
-          )}
-        </Text>
+        <View style={styles.metaRow}>
+          <Icon name="location-outline" size={15} color={C.primary} />
+          <Text style={styles.cardMetaText} numberOfLines={1}>
+            {plan.location}
+          </Text>
+        </View>
+        <View style={styles.metaRow}>
+          <Icon name="calendar-clear-outline" size={15} color={C.accent} />
+          <Text style={styles.cardMetaText}>
+            {formatDateDisplay(
+              plan.date,
+              { weekday: "short", day: "numeric", month: "short" },
+              "Date TBD"
+            )}
+          </Text>
+        </View>
       </View>
 
       <View style={styles.vibes}>
@@ -76,7 +85,10 @@ function PlanCard({ plan, onPress }) {
             <Text style={styles.joinBtnText}>Join</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.forkBtn} onPress={onPress}>
-            <Text style={styles.forkBtnText}>⑂ Fork</Text>
+            <View style={styles.forkBtnContent}>
+              <Icon name="git-branch-outline" size={14} color={C.text} />
+              <Text style={styles.forkBtnText}>Fork</Text>
+            </View>
           </TouchableOpacity>
         </View>
       </View>
@@ -87,7 +99,13 @@ function PlanCard({ plan, onPress }) {
 function EmptyFeed({ tab }) {
   return (
     <View style={styles.empty}>
-      <Text style={styles.emptyIcon}>{tab === "friends" ? "👥" : "🗺"}</Text>
+      <View style={styles.emptyIcon}>
+        <Icon
+          name={tab === "friends" ? "people-outline" : "map-outline"}
+          size={30}
+          color={C.primary}
+        />
+      </View>
       <Text style={styles.emptyTitle}>
         {tab === "friends" ? "No friend plans yet" : "Nothing nearby"}
       </Text>
@@ -140,7 +158,7 @@ export default function HomeScreen({ navigation }) {
       <View style={styles.header}>
         <View>
           <Text style={styles.greeting}>
-            Hey {profile?.username?.split("_")[0] ?? "there"} 👋
+            Hey {profile?.username?.split("_")[0] ?? "there"}
           </Text>
           <Text style={styles.headerTitle}>What's the plan?</Text>
         </View>
@@ -174,7 +192,9 @@ export default function HomeScreen({ navigation }) {
               · {nextPlan.location}
             </Text>
           </View>
-          <Text style={styles.nextArrow}>→</Text>
+          <View style={styles.nextArrow}>
+            <Icon name="arrow-forward" size={18} color={C.surface} />
+          </View>
         </TouchableOpacity>
       )}
 
@@ -267,7 +287,7 @@ const styles = StyleSheet.create({
   nextStrip: {
     marginHorizontal: 20,
     marginBottom: 16,
-    backgroundColor: C.primary,
+    backgroundColor: C.ink,
     borderRadius: 10,
     padding: 16,
     flexDirection: "row",
@@ -276,13 +296,21 @@ const styles = StyleSheet.create({
   },
   nextLabel: {
     fontSize: 11,
-    color: "rgba(255,255,255,0.7)",
-    fontWeight: Typography.semibold,
+    color: C.sun,
+    fontWeight: Typography.bold,
     marginBottom: 3,
+    textTransform: "uppercase",
   },
   nextTitle: { fontSize: 16, fontWeight: Typography.bold, color: C.surface },
   nextDate: { fontSize: 12, color: "rgba(255,255,255,0.8)", marginTop: 2 },
-  nextArrow: { fontSize: 20, color: C.surface },
+  nextArrow: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: C.primary,
+    justifyContent: "center",
+    alignItems: "center",
+  },
 
   tabs: {
     flexDirection: "row",
@@ -291,7 +319,11 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   tab: { paddingVertical: 8, paddingHorizontal: 14, borderRadius: 8 },
-  tabActive: { backgroundColor: C.sand },
+  tabActive: {
+    backgroundColor: C.surfaceWarm,
+    borderWidth: 1,
+    borderColor: C.border,
+  },
   tabText: { fontSize: 14, fontWeight: Typography.semibold, color: C.muted },
   tabTextActive: { color: C.text },
 
@@ -316,6 +348,8 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     borderColor: C.border,
+    borderLeftWidth: 4,
+    borderLeftColor: C.sun,
   },
   cardTop: {
     flexDirection: "row",
@@ -327,6 +361,9 @@ const styles = StyleSheet.create({
   hostName: { fontSize: 13, fontWeight: Typography.semibold, color: C.primary },
   mutual: { fontSize: 11, color: C.muted },
   forkBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
     paddingHorizontal: 8,
     paddingVertical: 3,
     backgroundColor: C.sand,
@@ -343,8 +380,9 @@ const styles = StyleSheet.create({
     color: C.text,
     marginBottom: 8,
   },
-  cardMeta: { gap: 3, marginBottom: 10 },
-  cardMetaText: { fontSize: 13, color: C.muted },
+  cardMeta: { gap: 5, marginBottom: 10 },
+  metaRow: { flexDirection: "row", alignItems: "center", gap: 7 },
+  cardMetaText: { flex: 1, fontSize: 13, color: C.muted },
   vibes: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: 12 },
   cardFooter: {
     flexDirection: "row",
@@ -370,10 +408,21 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
     borderRadius: 8,
   },
+  forkBtnContent: { flexDirection: "row", alignItems: "center", gap: 5 },
   forkBtnText: { color: C.text, fontWeight: Typography.semibold, fontSize: 13 },
 
   empty: { alignItems: "center", paddingTop: 60, paddingHorizontal: 32 },
-  emptyIcon: { fontSize: 36, marginBottom: 12 },
+  emptyIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 18,
+    marginBottom: 12,
+    backgroundColor: C.surfaceWarm,
+    borderWidth: 1,
+    borderColor: C.border,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   emptyTitle: {
     fontSize: 16,
     fontWeight: Typography.bold,

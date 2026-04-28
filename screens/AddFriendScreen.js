@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   FlatList,
 } from "react-native";
+import { Ionicons as Icon } from "@expo/vector-icons";
 import {
   collection,
   query,
@@ -135,7 +136,7 @@ export default function AddFriendScreen({ navigation }) {
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.searchBtnText}>Search</Text>
+            <Icon name="search" size={18} color={C.surface} />
           )}
         </TouchableOpacity>
       </View>
@@ -168,7 +169,8 @@ export default function AddFriendScreen({ navigation }) {
               </View>
               {isFriend ? (
                 <View style={styles.friendTag}>
-                  <Text style={styles.friendTagText}>Friends ✓</Text>
+                  <Icon name="checkmark" size={15} color={C.primary} />
+                  <Text style={styles.friendTagText}>Friends</Text>
                 </View>
               ) : (
                 <TouchableOpacity
@@ -189,7 +191,9 @@ export default function AddFriendScreen({ navigation }) {
         ListEmptyComponent={
           !loading && search.length > 0 ? null : (
             <View style={styles.hint}>
-              <Text style={styles.hintIcon}>🔍</Text>
+              <View style={styles.hintIcon}>
+                <Icon name="search-outline" size={28} color={C.primary} />
+              </View>
               <Text style={styles.hintText}>
                 Search for a friend by their exact username
               </Text>
@@ -235,16 +239,12 @@ const styles = StyleSheet.create({
   },
   searchBtn: {
     backgroundColor: C.primary,
-    paddingHorizontal: 18,
+    paddingHorizontal: 16,
     borderRadius: 10,
     justifyContent: "center",
+    alignItems: "center",
+    minWidth: 52,
   },
-  searchBtnText: {
-    color: C.surface,
-    fontWeight: Typography.bold,
-    fontSize: 14,
-  },
-
   list: { paddingHorizontal: 20, paddingBottom: 60 },
   row: {
     flexDirection: "row",
@@ -274,6 +274,9 @@ const styles = StyleSheet.create({
   addBtnTextSent: { color: C.muted },
 
   friendTag: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
     paddingHorizontal: 12,
     paddingVertical: 8,
     backgroundColor: C.sand,
@@ -286,6 +289,15 @@ const styles = StyleSheet.create({
   },
 
   hint: { alignItems: "center", paddingTop: 60, gap: 10 },
-  hintIcon: { fontSize: 32 },
+  hintIcon: {
+    width: 62,
+    height: 62,
+    borderRadius: 18,
+    backgroundColor: C.surfaceWarm,
+    borderWidth: 1,
+    borderColor: C.border,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   hintText: { fontSize: 14, color: C.muted, textAlign: "center" },
 });

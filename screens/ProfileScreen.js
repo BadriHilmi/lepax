@@ -11,6 +11,7 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
+import { Ionicons as Icon } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import {
   collection,
@@ -189,7 +190,7 @@ export default function ProfileScreen({ navigation }) {
               />
             )}
             <View style={styles.editBadge}>
-              <Text style={styles.editBadgeIcon}>✎</Text>
+              <Icon name="pencil" size={12} color={C.text} />
             </View>
           </TouchableOpacity>
           <Text style={styles.username}>@{profile?.username}</Text>
@@ -258,20 +259,25 @@ export default function ProfileScreen({ navigation }) {
                     <Text style={styles.planTitle}>{plan.title}</Text>
                     <Text style={styles.planVisibility}>{plan.visibility}</Text>
                   </View>
-                  <Text style={styles.planMeta}>📍 {plan.location}</Text>
-                  <Text style={styles.planMeta}>
-                    🗓{" "}
-                    {plan.date
-                      ? new Date(plan.date).toLocaleDateString([], {
-                          weekday: "short",
-                          day: "numeric",
-                          month: "short",
-                        })
-                      : "Date TBD"}
-                  </Text>
-                  <Text style={styles.planMeta}>
-                    👥 {plan.joinedBy?.length ?? 0} going · ⑂ {plan.forks ?? 0}
-                  </Text>
+                  <MetaLine icon="location-outline" text={plan.location} />
+                  <MetaLine
+                    icon="calendar-clear-outline"
+                    text={
+                      plan.date
+                        ? new Date(plan.date).toLocaleDateString([], {
+                            weekday: "short",
+                            day: "numeric",
+                            month: "short",
+                          })
+                        : "Date TBD"
+                    }
+                  />
+                  <MetaLine
+                    icon="people-outline"
+                    text={`${plan.joinedBy?.length ?? 0} going · ${
+                      plan.forks ?? 0
+                    } forks`}
+                  />
                 </TouchableOpacity>
               ))}
             </View>
@@ -309,6 +315,17 @@ function Stat({ label, value }) {
     <View style={styles.stat}>
       <Text style={styles.statValue}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
+    </View>
+  );
+}
+
+function MetaLine({ icon, text }) {
+  return (
+    <View style={styles.metaLine}>
+      <Icon name={icon} size={13} color={C.muted} />
+      <Text style={styles.planMeta} numberOfLines={1}>
+        {text}
+      </Text>
     </View>
   );
 }
@@ -355,7 +372,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  editBadgeIcon: { fontSize: 11, color: C.text },
   username: { fontSize: 18, fontWeight: Typography.bold, color: C.text },
   email: { fontSize: 13, color: C.muted },
 
@@ -442,7 +458,8 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 99,
   },
-  planMeta: { fontSize: 13, color: C.muted },
+  metaLine: { flexDirection: "row", alignItems: "center", gap: 5 },
+  planMeta: { flex: 1, fontSize: 13, color: C.muted },
 
   suggestionCard: {
     backgroundColor: C.surface,

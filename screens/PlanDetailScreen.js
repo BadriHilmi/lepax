@@ -10,6 +10,7 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
+import { Ionicons as Icon } from "@expo/vector-icons";
 import {
   doc,
   getDoc,
@@ -185,7 +186,7 @@ export default function PlanDetailScreen({ route, navigation }) {
               <Text style={styles.hostName}>@{plan.hostUsername}</Text>
               {plan.forkedFrom && (
                 <Text style={styles.forkedFrom}>
-                  ⑂ forked from @{plan.forkedFrom.hostUsername}
+                  forked from @{plan.forkedFrom.hostUsername}
                 </Text>
               )}
             </View>
@@ -194,10 +195,14 @@ export default function PlanDetailScreen({ route, navigation }) {
 
         {/* Details card */}
         <View style={styles.detailsCard}>
-          <DetailRow icon="📍" label="Location" value={plan.location} />
+          <DetailRow
+            icon="location-outline"
+            label="Location"
+            value={plan.location}
+          />
           <View style={styles.divider} />
           <DetailRow
-            icon="🗓"
+            icon="calendar-clear-outline"
             label="Date"
             value={
               plan.date
@@ -213,12 +218,16 @@ export default function PlanDetailScreen({ route, navigation }) {
           />
           <View style={styles.divider} />
           <DetailRow
-            icon="👥"
+            icon="people-outline"
             label="Going"
             value={`${plan.joinedBy?.length ?? 0} people`}
           />
           <View style={styles.divider} />
-          <DetailRow icon="⑂" label="Forks" value={plan.forks ?? 0} />
+          <DetailRow
+            icon="git-branch-outline"
+            label="Forks"
+            value={plan.forks ?? 0}
+          />
         </View>
 
         {/* Map */}
@@ -264,7 +273,10 @@ export default function PlanDetailScreen({ route, navigation }) {
                   <Text style={styles.timeTime}>{item.time}</Text>
                   <Text style={styles.timeActivity}>{item.activity}</Text>
                   {item.location ? (
-                    <Text style={styles.timeLoc}>📍 {item.location}</Text>
+                    <View style={styles.timeLocRow}>
+                      <Icon name="location-outline" size={13} color={C.muted} />
+                      <Text style={styles.timeLoc}>{item.location}</Text>
+                    </View>
                   ) : null}
                 </View>
               </View>
@@ -308,7 +320,10 @@ export default function PlanDetailScreen({ route, navigation }) {
               {forking ? (
                 <ActivityIndicator color={C.text} />
               ) : (
-                <Text style={styles.forkBtnText}>⑂ Fork</Text>
+                <View style={styles.forkBtnContent}>
+                  <Icon name="git-branch-outline" size={17} color={C.text} />
+                  <Text style={styles.forkBtnText}>Fork</Text>
+                </View>
               )}
             </TouchableOpacity>
           </>
@@ -338,7 +353,9 @@ export default function PlanDetailScreen({ route, navigation }) {
 function DetailRow({ icon, label, value }) {
   return (
     <View style={styles.detailRow}>
-      <Text style={styles.detailIcon}>{icon}</Text>
+      <View style={styles.detailIcon}>
+        <Icon name={icon} size={17} color={C.primary} />
+      </View>
       <Text style={styles.detailLabel}>{label}</Text>
       <Text style={styles.detailValue}>{String(value)}</Text>
     </View>
@@ -405,7 +422,14 @@ const styles = StyleSheet.create({
     padding: 14,
     gap: 10,
   },
-  detailIcon: { fontSize: 16, width: 22 },
+  detailIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 9,
+    backgroundColor: C.surfaceWarm,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   detailLabel: { fontSize: 13, color: C.muted, flex: 1 },
   detailValue: { fontSize: 14, fontWeight: Typography.semibold, color: C.text },
   divider: { height: 1, backgroundColor: C.border, marginHorizontal: 14 },
@@ -440,7 +464,13 @@ const styles = StyleSheet.create({
     fontWeight: Typography.semibold,
     color: C.text,
   },
-  timeLoc: { fontSize: 12, color: C.muted, marginTop: 2 },
+  timeLocRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 3,
+  },
+  timeLoc: { fontSize: 12, color: C.muted },
 
   actionBar: {
     position: "absolute",
@@ -471,7 +501,9 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 10,
     alignItems: "center",
+    justifyContent: "center",
   },
+  forkBtnContent: { flexDirection: "row", alignItems: "center", gap: 6 },
   forkBtnText: { color: C.text, fontWeight: Typography.semibold, fontSize: 15 },
   cancelPlanBtn: {
     flex: 1,

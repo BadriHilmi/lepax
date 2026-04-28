@@ -3,16 +3,21 @@ import { StyleSheet } from "react-native";
 
 // ─── Brand Colors ─────────────────────────────────────────────────────────────
 export const C = {
-  bg: "#FAF9F6",
+  bg: "#F7F1E6",
   surface: "#FFFFFF",
-  primary: "#7C9A6B",
-  accent: "#D4847C",
-  sand: "#E6DCC4",
-  sandDeep: "#D9CEAD",
-  text: "#2D2D2D",
-  muted: "#8A8A8A",
-  border: "#E8E4DC",
-  overlay: "rgba(45, 45, 45, 0.3)",
+  surfaceWarm: "#FFF8EA",
+  ink: "#252323",
+  primary: "#17766A",
+  primaryDark: "#0F4D46",
+  accent: "#E4572E",
+  sun: "#F4B942",
+  aqua: "#46B6B0",
+  sand: "#E9DAB9",
+  sandDeep: "#D7BE83",
+  text: "#252323",
+  muted: "#7B746A",
+  border: "#E0D3B8",
+  overlay: "rgba(37, 35, 35, 0.36)",
 
   // Status
   success: "#6DD47E",
@@ -24,11 +29,11 @@ export const C = {
 export const VIBES = ["chill", "foodie", "adventure", "budget", "spontaneous"];
 
 export const VIBE_COLORS = {
-  chill: { bg: "#EEF4EB", text: "#5A7A4A" },
-  foodie: { bg: "#FDF0EE", text: "#B5615A" },
-  adventure: { bg: "#EEF4EB", text: "#5A7A4A" },
-  budget: { bg: "#F5F2EC", text: "#7A6A4A" },
-  spontaneous: { bg: "#FDF0EE", text: "#B5615A" },
+  chill: { bg: "#DDF1E7", text: "#17766A", border: "#B7DDCE" },
+  foodie: { bg: "#FFE2D5", text: "#B84224", border: "#F3B39C" },
+  adventure: { bg: "#E5EBC8", text: "#5B6F1D", border: "#C9D685" },
+  budget: { bg: "#FFF1BE", text: "#856118", border: "#E8CB6F" },
+  spontaneous: { bg: "#DCEAFB", text: "#2B5F8C", border: "#AFCBEA" },
 };
 
 // ─── Typography ───────────────────────────────────────────────────────────────
@@ -76,7 +81,7 @@ export const Shadows = {
     elevation: 1,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
+    shadowOpacity: 0.07,
     shadowRadius: 4,
   },
   medium: {
@@ -85,6 +90,13 @@ export const Shadows = {
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
+  },
+  brand: {
+    elevation: 5,
+    shadowColor: C.ink,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 18,
   },
 };
 
