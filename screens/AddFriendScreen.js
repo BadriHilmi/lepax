@@ -11,7 +11,6 @@ import {
   ActivityIndicator,
   FlatList,
 } from "react-native";
-import { Ionicons as Icon } from "@expo/vector-icons";
 import {
   collection,
   query,
@@ -24,6 +23,7 @@ import { db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
 import { C, Typography } from "../constants/theme";
 import Avatar from "../components/Avatar";
+import AppIcon from "../components/AppIcon";
 
 export default function AddFriendScreen({ navigation }) {
   const { user, profile } = useAuth();
@@ -136,7 +136,7 @@ export default function AddFriendScreen({ navigation }) {
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Icon name="search" size={18} color={C.surface} />
+            <AppIcon name="search" size={18} color={C.surface} />
           )}
         </TouchableOpacity>
       </View>
@@ -169,7 +169,7 @@ export default function AddFriendScreen({ navigation }) {
               </View>
               {isFriend ? (
                 <View style={styles.friendTag}>
-                  <Icon name="checkmark" size={15} color={C.primary} />
+                  <AppIcon name="check" size={15} color={C.primary} />
                   <Text style={styles.friendTagText}>Friends</Text>
                 </View>
               ) : (
@@ -192,7 +192,7 @@ export default function AddFriendScreen({ navigation }) {
           !loading && search.length > 0 ? null : (
             <View style={styles.hint}>
               <View style={styles.hintIcon}>
-                <Icon name="search-outline" size={28} color={C.primary} />
+                <AppIcon name="search" size={28} color={C.primary} />
               </View>
               <Text style={styles.hintText}>
                 Search for a friend by their exact username

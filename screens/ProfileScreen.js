@@ -11,7 +11,6 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
-import { Ionicons as Icon } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import {
   collection,
@@ -26,6 +25,7 @@ import { auth, db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
 import { C, Typography } from "../constants/theme";
 import Avatar from "../components/Avatar";
+import AppIcon from "../components/AppIcon";
 
 const CLOUD_NAME = process.env.EXPO_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const UPLOAD_PRESET = process.env.EXPO_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
@@ -190,7 +190,7 @@ export default function ProfileScreen({ navigation }) {
               />
             )}
             <View style={styles.editBadge}>
-              <Icon name="pencil" size={12} color={C.text} />
+              <AppIcon name="pencil" size={12} color={C.text} />
             </View>
           </TouchableOpacity>
           <Text style={styles.username}>@{profile?.username}</Text>
@@ -259,9 +259,9 @@ export default function ProfileScreen({ navigation }) {
                     <Text style={styles.planTitle}>{plan.title}</Text>
                     <Text style={styles.planVisibility}>{plan.visibility}</Text>
                   </View>
-                  <MetaLine icon="location-outline" text={plan.location} />
+                  <MetaLine icon="mapPin" text={plan.location} />
                   <MetaLine
-                    icon="calendar-clear-outline"
+                    icon="calendar"
                     text={
                       plan.date
                         ? new Date(plan.date).toLocaleDateString([], {
@@ -273,7 +273,7 @@ export default function ProfileScreen({ navigation }) {
                     }
                   />
                   <MetaLine
-                    icon="people-outline"
+                    icon="users"
                     text={`${plan.joinedBy?.length ?? 0} going · ${
                       plan.forks ?? 0
                     } forks`}
@@ -322,7 +322,7 @@ function Stat({ label, value }) {
 function MetaLine({ icon, text }) {
   return (
     <View style={styles.metaLine}>
-      <Icon name={icon} size={13} color={C.muted} />
+      <AppIcon name={icon} size={13} color={C.muted} />
       <Text style={styles.planMeta} numberOfLines={1}>
         {text}
       </Text>

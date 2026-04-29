@@ -3,9 +3,9 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { View } from "react-native";
-import { Ionicons as Icon } from "@expo/vector-icons";
 import { useAuth } from "../context/AuthContext";
 import { C, Typography } from "../constants/theme";
+import AppIcon from "../components/AppIcon";
 
 import AuthScreen from "../screens/AuthScreen";
 import HomeScreen from "../screens/HomeScreen";
@@ -31,7 +31,7 @@ function TabIcon({ name, focused }) {
         backgroundColor: focused ? C.surfaceWarm : "transparent",
       }}
     >
-      <Icon
+      <AppIcon
         name={name}
         size={20}
         color={focused ? C.primary : C.muted}
@@ -69,7 +69,7 @@ function MainTabs() {
         options={{
           tabBarLabel: "Home",
           tabBarIcon: ({ focused }) => (
-            <TabIcon name="map-outline" focused={focused} />
+            <TabIcon name="map" focused={focused} />
           ),
         }}
       />
@@ -79,7 +79,7 @@ function MainTabs() {
         options={{
           tabBarLabel: "Free now",
           tabBarIcon: ({ focused }) => (
-            <TabIcon name="flash-outline" focused={focused} />
+            <TabIcon name="zap" focused={focused} />
           ),
         }}
       />
@@ -89,7 +89,7 @@ function MainTabs() {
         options={{
           tabBarLabel: "Profile",
           tabBarIcon: ({ focused }) => (
-            <TabIcon name="person-circle-outline" focused={focused} />
+            <TabIcon name="circleUser" focused={focused} />
           ),
         }}
       />

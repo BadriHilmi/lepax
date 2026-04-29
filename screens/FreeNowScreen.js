@@ -10,7 +10,6 @@ import {
   Platform,
   Alert,
 } from "react-native";
-import { Ionicons as Icon } from "@expo/vector-icons";
 import {
   collection,
   query,
@@ -23,6 +22,7 @@ import { db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
 import { C, Typography } from "../constants/theme";
 import Avatar from "../components/Avatar";
+import AppIcon from "../components/AppIcon";
 
 const NUDGE_MSGS = [
   "jom mamak?",
@@ -115,13 +115,13 @@ export default function FreeNowScreen({ navigation }) {
               style={styles.headerBtn}
               onPress={() => navigation.navigate("FriendRequests")}
             >
-              <Icon name="mail-outline" size={18} color={C.text} />
+              <AppIcon name="mail" size={18} color={C.text} />
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.headerBtn, styles.headerBtnPrimary]}
               onPress={() => navigation.navigate("AddFriend")}
             >
-              <Icon name="person-add-outline" size={18} color={C.surface} />
+              <AppIcon name="userPlus" size={18} color={C.surface} />
             </TouchableOpacity>
           </View>
         </View>
@@ -140,7 +140,7 @@ export default function FreeNowScreen({ navigation }) {
           </Text>
         </View>
         <View style={styles.broadcastArrow}>
-          <Icon name="send-outline" size={18} color={C.ink} />
+          <AppIcon name="send" size={18} color={C.ink} />
         </View>
       </TouchableOpacity>
 
@@ -185,7 +185,7 @@ export default function FreeNowScreen({ navigation }) {
           !loading && (
             <View style={styles.empty}>
               <View style={styles.emptyIcon}>
-                <Icon name="people-outline" size={30} color={C.primary} />
+                <AppIcon name="users" size={30} color={C.primary} />
               </View>
               <Text style={styles.emptyTitle}>No friends yet</Text>
               <Text style={styles.emptySub}>

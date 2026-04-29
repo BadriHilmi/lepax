@@ -10,7 +10,6 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
-import { Ionicons as Icon } from "@expo/vector-icons";
 import {
   collection,
   query,
@@ -24,6 +23,7 @@ import { db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
 import { C, Typography } from "../constants/theme";
 import Avatar from "../components/Avatar";
+import AppIcon from "../components/AppIcon";
 
 export default function FriendRequestsScreen({ navigation }) {
   const { user, setProfile } = useAuth();
@@ -63,7 +63,7 @@ export default function FriendRequestsScreen({ navigation }) {
       // Update local profile state
       setProfile((p) => ({
         ...p,
-        friends: [...(p.friends ?? []), req.fromUid],
+        friends: [...new Set([...(p?.friends ?? []), req.fromUid])],
       }));
     } catch (err) {
       Alert.alert("Error", err.message);
@@ -150,7 +150,7 @@ export default function FriendRequestsScreen({ navigation }) {
           ListEmptyComponent={
             <View style={styles.empty}>
               <View style={styles.emptyIcon}>
-                <Icon name="mail-open-outline" size={30} color={C.primary} />
+                <AppIcon name="mailOpen" size={30} color={C.primary} />
               </View>
               <Text style={styles.emptyTitle}>No pending requests</Text>
               <Text style={styles.emptySub}>

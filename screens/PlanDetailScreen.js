@@ -10,7 +10,6 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
-import { Ionicons as Icon } from "@expo/vector-icons";
 import {
   doc,
   getDoc,
@@ -29,6 +28,7 @@ import VibeTag from "../components/VibeTag";
 import Avatar from "../components/Avatar";
 import AlertBox from "../components/AlertBox";
 import MapPicker from "../components/MapPicker";
+import AppIcon from "../components/AppIcon";
 
 export default function PlanDetailScreen({ route, navigation }) {
   const { planId } = route.params;
@@ -196,13 +196,13 @@ export default function PlanDetailScreen({ route, navigation }) {
         {/* Details card */}
         <View style={styles.detailsCard}>
           <DetailRow
-            icon="location-outline"
+            icon="mapPin"
             label="Location"
             value={plan.location}
           />
           <View style={styles.divider} />
           <DetailRow
-            icon="calendar-clear-outline"
+            icon="calendar"
             label="Date"
             value={
               plan.date
@@ -218,13 +218,13 @@ export default function PlanDetailScreen({ route, navigation }) {
           />
           <View style={styles.divider} />
           <DetailRow
-            icon="people-outline"
+            icon="users"
             label="Going"
             value={`${plan.joinedBy?.length ?? 0} people`}
           />
           <View style={styles.divider} />
           <DetailRow
-            icon="git-branch-outline"
+            icon="branch"
             label="Forks"
             value={plan.forks ?? 0}
           />
@@ -274,7 +274,7 @@ export default function PlanDetailScreen({ route, navigation }) {
                   <Text style={styles.timeActivity}>{item.activity}</Text>
                   {item.location ? (
                     <View style={styles.timeLocRow}>
-                      <Icon name="location-outline" size={13} color={C.muted} />
+                      <AppIcon name="mapPin" size={13} color={C.muted} />
                       <Text style={styles.timeLoc}>{item.location}</Text>
                     </View>
                   ) : null}
@@ -321,7 +321,7 @@ export default function PlanDetailScreen({ route, navigation }) {
                 <ActivityIndicator color={C.text} />
               ) : (
                 <View style={styles.forkBtnContent}>
-                  <Icon name="git-branch-outline" size={17} color={C.text} />
+                  <AppIcon name="branch" size={17} color={C.text} />
                   <Text style={styles.forkBtnText}>Fork</Text>
                 </View>
               )}
@@ -354,7 +354,7 @@ function DetailRow({ icon, label, value }) {
   return (
     <View style={styles.detailRow}>
       <View style={styles.detailIcon}>
-        <Icon name={icon} size={17} color={C.primary} />
+        <AppIcon name={icon} size={17} color={C.primary} />
       </View>
       <Text style={styles.detailLabel}>{label}</Text>
       <Text style={styles.detailValue}>{String(value)}</Text>

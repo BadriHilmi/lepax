@@ -1,9 +1,9 @@
 // components/DatePickerInput.js
 import { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { Ionicons as Icon } from "@expo/vector-icons";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { C, Typography, Spacing, BorderRadius } from "../constants/theme";
+import AppIcon from "./AppIcon";
 import {
   formatDateDisplay,
   formatDateTimeDisplay,
@@ -50,17 +50,6 @@ const DatePickerInput = ({
     });
   };
 
-  const getIcon = () => {
-    switch (mode) {
-      case "time":
-        return "time-outline";
-      case "datetime":
-        return "calendar-outline";
-      default:
-        return "calendar-outline";
-    }
-  };
-
   return (
     <View style={styles.container}>
       {label && (
@@ -74,11 +63,15 @@ const DatePickerInput = ({
         onPress={showPicker}
         activeOpacity={0.8}
       >
-        <Icon name="calendar" size={18} color={C.muted} />
+        <AppIcon
+          name={mode === "time" ? "clock" : "calendar"}
+          size={18}
+          color={C.muted}
+        />
         <Text style={[styles.inputText, !value && styles.placeholderText]}>
           {value ? formatDate(value) : placeholder}
         </Text>
-        <Icon name="chevron-down" size={18} color={C.muted} />
+        <AppIcon name="chevronDown" size={18} color={C.muted} />
       </TouchableOpacity>
       <DateTimePickerModal
         isVisible={isPickerVisible}

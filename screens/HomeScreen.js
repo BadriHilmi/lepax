@@ -9,7 +9,6 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
-import { Ionicons as Icon } from "@expo/vector-icons";
 import {
   collection,
   query,
@@ -22,6 +21,7 @@ import { useAuth } from "../context/AuthContext";
 import { C, Typography } from "../constants/theme";
 import VibeTag from "../components/VibeTag";
 import Avatar from "../components/Avatar";
+import AppIcon from "../components/AppIcon";
 import { formatDateDisplay } from "../utils/date";
 
 function PlanCard({ plan, onPress }) {
@@ -45,7 +45,7 @@ function PlanCard({ plan, onPress }) {
         </View>
         {plan.forks > 0 && (
           <View style={styles.forkBadge}>
-            <Icon name="git-branch-outline" size={12} color={C.text} />
+            <AppIcon name="branch" size={12} color={C.text} />
             <Text style={styles.forkBadgeText}>{plan.forks}</Text>
           </View>
         )}
@@ -55,13 +55,13 @@ function PlanCard({ plan, onPress }) {
 
       <View style={styles.cardMeta}>
         <View style={styles.metaRow}>
-          <Icon name="location-outline" size={15} color={C.primary} />
+          <AppIcon name="mapPin" size={15} color={C.primary} />
           <Text style={styles.cardMetaText} numberOfLines={1}>
             {plan.location}
           </Text>
         </View>
         <View style={styles.metaRow}>
-          <Icon name="calendar-clear-outline" size={15} color={C.accent} />
+          <AppIcon name="calendar" size={15} color={C.accent} />
           <Text style={styles.cardMetaText}>
             {formatDateDisplay(
               plan.date,
@@ -82,11 +82,14 @@ function PlanCard({ plan, onPress }) {
         <Text style={styles.goingText}>{plan.joinedBy?.length ?? 0} going</Text>
         <View style={styles.cardActions}>
           <TouchableOpacity style={styles.joinBtn} onPress={onPress}>
-            <Text style={styles.joinBtnText}>Join</Text>
+            <View style={styles.joinBtnContent}>
+              <AppIcon name="users" size={14} color={C.surface} />
+              <Text style={styles.joinBtnText}>Join</Text>
+            </View>
           </TouchableOpacity>
           <TouchableOpacity style={styles.forkBtn} onPress={onPress}>
             <View style={styles.forkBtnContent}>
-              <Icon name="git-branch-outline" size={14} color={C.text} />
+              <AppIcon name="branch" size={14} color={C.text} />
               <Text style={styles.forkBtnText}>Fork</Text>
             </View>
           </TouchableOpacity>
@@ -100,8 +103,8 @@ function EmptyFeed({ tab }) {
   return (
     <View style={styles.empty}>
       <View style={styles.emptyIcon}>
-        <Icon
-          name={tab === "friends" ? "people-outline" : "map-outline"}
+        <AppIcon
+          name={tab === "friends" ? "users" : "map"}
           size={30}
           color={C.primary}
         />
@@ -193,7 +196,7 @@ export default function HomeScreen({ navigation }) {
             </Text>
           </View>
           <View style={styles.nextArrow}>
-            <Icon name="arrow-forward" size={18} color={C.surface} />
+            <AppIcon name="arrowRight" size={18} color={C.surface} />
           </View>
         </TouchableOpacity>
       )}
@@ -259,7 +262,7 @@ export default function HomeScreen({ navigation }) {
         onPress={() => navigation.navigate("CreatePlan")}
         activeOpacity={0.85}
       >
-        <Text style={styles.fabIcon}>+</Text>
+        <AppIcon name="plus" size={28} color={C.surface} />
       </TouchableOpacity>
     </View>
   );
@@ -400,6 +403,7 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
     borderRadius: 8,
   },
+  joinBtnContent: { flexDirection: "row", alignItems: "center", gap: 5 },
   joinBtnText: { color: C.surface, fontWeight: Typography.bold, fontSize: 13 },
   forkBtn: {
     borderWidth: 1,
@@ -453,5 +457,4 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 4,
   },
-  fabIcon: { fontSize: 26, color: C.surface, lineHeight: 30 },
 });

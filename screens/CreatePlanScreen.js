@@ -11,7 +11,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Ionicons as Icon } from "@expo/vector-icons";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
@@ -19,6 +18,7 @@ import { C, Typography, VIBES } from "../constants/theme";
 import DatePickerInput from "../components/DatePickerInput";
 import MapPicker from "../components/MapPicker";
 import FormField from "../components/FormField";
+import AppIcon from "../components/AppIcon";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -27,19 +27,19 @@ const VISIBILITY_OPTIONS = [
     value: "private",
     label: "Just me",
     desc: "Invite people manually",
-    icon: "lock-closed-outline",
+    icon: "lock",
   },
   {
     value: "friends",
     label: "Friends",
     desc: "Visible to your friends",
-    icon: "people-outline",
+    icon: "users",
   },
   {
     value: "public",
     label: "Public",
     desc: "Anyone can discover it",
-    icon: "earth-outline",
+    icon: "globe",
   },
 ];
 
@@ -466,7 +466,7 @@ function StepVisibility({ visibility, onSelect }) {
               visibility === opt.value && styles.visIconActive,
             ]}
           >
-            <Icon
+            <AppIcon
               name={opt.icon}
               size={20}
               color={visibility === opt.value ? C.surface : C.primary}
@@ -587,7 +587,7 @@ function StepDetails({
           <ActivityIndicator color={C.surface} />
         ) : (
           <View style={styles.findBtnContent}>
-            <Icon name="navigate-outline" size={17} color={C.surface} />
+            <AppIcon name="navigation" size={17} color={C.surface} />
             <Text style={styles.findBtnText}>Use first result</Text>
           </View>
         )}

@@ -7,20 +7,17 @@ import {
   TouchableOpacity,
   StyleSheet,
   Animated,
-  Dimensions,
 } from "react-native";
 import { C, Typography, Spacing, BorderRadius } from "../constants/theme";
-import { Ionicons as Icon } from "@expo/vector-icons";
-
-const { width } = Dimensions.get("window");
+import AppIcon from "./AppIcon";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 const TYPE_CONFIG = {
-  success: { icon: "✓", color: C.success, bg: "#F0FAF1" },
-  error: { icon: "✕", color: C.danger, bg: "#FDF2F2" },
-  warning: { icon: "!", color: C.warning, bg: "#FFFBF0" },
-  info: { icon: "i", color: C.primary, bg: "#F2F6F0" },
-  confirm: { icon: "?", color: C.accent, bg: "#FDF5F4", size: 24 },
+  success: { icon: "circleCheck", color: C.success, bg: "#F0FAF1" },
+  error: { icon: "circleX", color: C.danger, bg: "#FDF2F2" },
+  warning: { icon: "alertTriangle", color: C.warning, bg: "#FFFBF0" },
+  info: { icon: "info", color: C.primary, bg: "#F2F6F0" },
+  confirm: { icon: "circleHelp", color: C.accent, bg: "#FDF5F4", size: 24 },
 };
 
 // ─── Component ────────────────────────────────────────────────────────────────
@@ -92,9 +89,11 @@ export default function AlertBox({
         >
           {/* Icon badge */}
           <View style={[styles.iconBadge, { backgroundColor: config.bg }]}>
-            <Text style={[styles.iconText, { color: config.color }]}>
-              {config.icon}
-            </Text>
+            <AppIcon
+              name={config.icon}
+              size={config.size ?? 24}
+              color={config.color}
+            />
           </View>
 
           {/* Content */}
@@ -167,12 +166,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: Spacing.lg,
   },
-  iconText: {
-    fontSize: 22,
-    fontWeight: Typography.bold,
-    lineHeight: 26,
-  },
-
   title: {
     fontSize: Typography.xxl,
     fontWeight: Typography.bold,
