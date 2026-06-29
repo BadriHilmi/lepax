@@ -9,6 +9,7 @@ import {
   StyleSheet,
   Platform,
   Alert,
+  StatusBar,
 } from "react-native";
 import {
   collection,
@@ -20,9 +21,10 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
-import { C, Typography } from "../constants/theme";
+import { C, Typography, Families, Brutalist } from "../constants/theme";
 import Avatar from "../components/Avatar";
 import AppIcon from "../components/AppIcon";
+import { useToast } from "../context/ToastContext";
 
 const NUDGE_MSGS = [
   "jom mamak?",
@@ -35,6 +37,7 @@ const randMsg = () => NUDGE_MSGS[Math.floor(Math.random() * NUDGE_MSGS.length)];
 
 export default function FreeNowScreen({ navigation }) {
   const { user, profile } = useAuth();
+  const { showToast } = useToast();
   const [friends, setFriends] = useState([]);
   const [nudgedIds, setNudgedIds] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -74,14 +77,14 @@ export default function FreeNowScreen({ navigation }) {
       });
       setNudgedIds((p) => [...p, toUid]);
     } catch (err) {
-      Alert.alert("Error", err.message);
+      showToast(err.message, "error");
     }
   };
 
   const broadcastNudge = async () => {
     const ids = profile?.friends ?? [];
     if (!ids.length) {
-      Alert.alert("No friends yet", "Add friends first.");
+      showToast("Add friends first.", "error");
       return;
     }
     const msg = randMsg();
@@ -96,9 +99,9 @@ export default function FreeNowScreen({ navigation }) {
         read: false,
       });
       setNudgedIds(ids);
-      Alert.alert("Nudged!", `"${msg}" sent to all friends.`);
+      showToast(`Sent "${msg}" to all friends!`, "success");
     } catch (err) {
-      Alert.alert("Error", err.message);
+      showToast(err.message, "error");
     }
   };
 
@@ -211,10 +214,10 @@ const styles = StyleSheet.create({
 
   header: {
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === "ios" ? 56 : 20,
+    paddingTop: Platform.OS === "ios" ? 56 : (StatusBar.currentHeight || 0) + 16,
     paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderColor: C.border,
+    borderBottomWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
   },
   headerTop: {
     flexDirection: "row",
@@ -223,23 +226,27 @@ const styles = StyleSheet.create({
   },
   headerActions: { flexDirection: "row", gap: 8 },
   headerBtn: {
-    borderWidth: 1,
-    borderColor: C.border,
+    borderWidth: 1.8,
+    borderColor: C.ink,
     paddingHorizontal: 12,
     paddingVertical: 7,
-    borderRadius: 8,
+    borderRadius: 6,
     backgroundColor: C.surface,
     minWidth: 42,
     alignItems: "center",
+    ...Brutalist.btnShadow,
   },
-  headerBtnPrimary: { backgroundColor: C.primary, borderColor: C.primary },
-  title: { fontSize: 22, fontWeight: Typography.bold, color: C.text },
-  subtitle: { fontSize: 13, color: C.muted, marginTop: 2 },
+  headerBtnPrimary: { backgroundColor: C.primary, borderColor: C.ink },
+  title: { fontSize: 24, fontFamily: Families.display, color: C.text },
+  subtitle: { fontSize: 13, fontFamily: Families.regular, color: C.muted, marginTop: 2 },
 
   broadcast: {
     margin: 20,
     backgroundColor: C.ink,
     borderRadius: 10,
+    borderWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
+    ...Brutalist.btnShadow,
     padding: 16,
     flexDirection: "row",
     justifyContent: "space-between",
@@ -247,14 +254,16 @@ const styles = StyleSheet.create({
   },
   broadcastTitle: {
     fontSize: 15,
-    fontWeight: Typography.bold,
+    fontFamily: Families.bold,
     color: C.surface,
   },
-  broadcastSub: { fontSize: 12, color: "rgba(255,255,255,0.75)", marginTop: 2 },
+  broadcastSub: { fontSize: 12, fontFamily: Families.medium, color: "rgba(255,255,255,0.85)", marginTop: 2 },
   broadcastArrow: {
     width: 34,
     height: 34,
     borderRadius: 17,
+    borderWidth: 1.5,
+    borderColor: C.ink,
     backgroundColor: C.sun,
     justifyContent: "center",
     alignItems: "center",
@@ -266,25 +275,32 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 14,
-    borderBottomWidth: 1,
+    borderBottomWidth: 1.2,
     borderColor: C.border,
   },
   rowLeft: { flexDirection: "row", alignItems: "center", gap: 12 },
-  rowName: { fontSize: 14, fontWeight: Typography.semibold, color: C.text },
-  rowStatus: { fontSize: 12, color: C.muted, marginTop: 1 },
+  rowName: { fontSize: 14, fontFamily: Families.bold, color: C.text },
+  rowStatus: { fontSize: 12, fontFamily: Families.regular, color: C.muted, marginTop: 1 },
 
   nudgeBtn: {
-    borderWidth: 1,
-    borderColor: C.primary,
+    borderWidth: 1.8,
+    borderColor: C.ink,
+    backgroundColor: C.primary,
     paddingHorizontal: 14,
     paddingVertical: 7,
-    borderRadius: 8,
+    borderRadius: 6,
+    ...Brutalist.btnShadow,
   },
-  nudgeBtnDone: { borderColor: C.border, backgroundColor: C.sand },
+  nudgeBtnDone: {
+    borderColor: C.border,
+    backgroundColor: C.sand,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 0,
+  },
   nudgeBtnText: {
-    fontSize: 13,
-    fontWeight: Typography.semibold,
-    color: C.primary,
+    fontSize: 12,
+    fontFamily: Families.bold,
+    color: C.surface,
   },
   nudgeBtnTextDone: { color: C.muted },
 
@@ -292,25 +308,26 @@ const styles = StyleSheet.create({
   emptyIcon: {
     width: 64,
     height: 64,
-    borderRadius: 18,
+    borderRadius: 10,
     marginBottom: 12,
     backgroundColor: C.surfaceWarm,
-    borderWidth: 1,
-    borderColor: C.border,
+    borderWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
     justifyContent: "center",
     alignItems: "center",
   },
   emptyTitle: {
     fontSize: 16,
-    fontWeight: Typography.bold,
+    fontFamily: Families.bold,
     color: C.text,
     marginBottom: 6,
   },
   emptySub: {
-    fontSize: 14,
+    fontSize: 13,
+    fontFamily: Families.regular,
     color: C.muted,
     textAlign: "center",
-    lineHeight: 20,
+    lineHeight: 18,
   },
 
   chatNote: {
@@ -320,8 +337,8 @@ const styles = StyleSheet.create({
     right: 0,
     padding: 16,
     backgroundColor: C.surface,
-    borderTopWidth: 1,
-    borderColor: C.border,
+    borderTopWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
   },
-  chatNoteText: { fontSize: 12, color: C.muted, textAlign: "center" },
+  chatNoteText: { fontSize: 11, fontFamily: Families.regular, color: C.muted, textAlign: "center" },
 });

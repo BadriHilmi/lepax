@@ -9,6 +9,7 @@ import {
   Platform,
   Alert,
   ActivityIndicator,
+  StatusBar,
 } from "react-native";
 import {
   collection,
@@ -173,7 +174,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === "ios" ? 56 : 20,
+    paddingTop: Platform.OS === "ios" ? 56 : (StatusBar.currentHeight || 0) + 12,
     paddingBottom: 12,
     borderBottomWidth: 1,
     borderColor: C.border,

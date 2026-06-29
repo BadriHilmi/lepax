@@ -1,5 +1,5 @@
 // screens/ProfileScreen.js
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   Platform,
   Alert,
   ActivityIndicator,
+  StatusBar,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import {
@@ -23,7 +24,7 @@ import {
 import { signOut } from "firebase/auth";
 import { auth, db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
-import { C, Typography } from "../constants/theme";
+import { C, Typography, Families, Brutalist } from "../constants/theme";
 import Avatar from "../components/Avatar";
 import AppIcon from "../components/AppIcon";
 
@@ -63,6 +64,7 @@ async function uploadToCloudinary(uri, uid) {
 
 export default function ProfileScreen({ navigation }) {
   const { user, profile, setProfile } = useAuth();
+  const bioInputRef = useRef(null);
   const [bio, setBio] = useState(profile?.bio ?? "");
   const [editing, setEditing] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -99,7 +101,7 @@ export default function ProfileScreen({ navigation }) {
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaType.IMAGE,
+      mediaTypes: "images",
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.7,
@@ -132,18 +134,6 @@ export default function ProfileScreen({ navigation }) {
     }
   };
 
-  const getSuggestions = () => {
-    const suggestions = [];
-    if (!profile?.bio) suggestions.push("Add a short bio so others know your vibe.");
-    if (!profile?.avatarUrl) suggestions.push("Upload a profile photo to build trust faster.");
-    if ((myPlans?.length ?? 0) < 2)
-      suggestions.push("Create 1–2 more plans this week to appear in more feeds.");
-    if ((profile?.friends?.length ?? 0) < 3)
-      suggestions.push("Add more friends to make your plans easier to fill.");
-    return suggestions;
-  };
-
-  const suggestions = getSuggestions();
 
   return (
     <View style={styles.root}>
@@ -212,6 +202,7 @@ export default function ProfileScreen({ navigation }) {
           {editing ? (
             <>
               <TextInput
+                ref={bioInputRef}
                 style={styles.bioInput}
                 value={bio}
                 onChangeText={setBio}
@@ -284,19 +275,6 @@ export default function ProfileScreen({ navigation }) {
           )}
         </View>
 
-        {/* Suggestions */}
-        {suggestions.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.sectionLabel}>Suggested improvements</Text>
-            <View style={styles.suggestionCard}>
-              {suggestions.map((tip) => (
-                <Text key={tip} style={styles.suggestionText}>
-                  • {tip}
-                </Text>
-              ))}
-            </View>
-          </View>
-        )}
 
         {/* Logout */}
         <TouchableOpacity
@@ -332,25 +310,38 @@ function MetaLine({ icon, text }) {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: C.bg },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: C.bg,
+  },
 
   navBar: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === "ios" ? 56 : 20,
+    paddingTop: Platform.OS === "ios" ? 56 : (StatusBar.currentHeight || 0) + 12,
     paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderColor: C.border,
+    borderBottomWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
   },
-  back: { fontSize: 15, color: C.primary, fontWeight: Typography.semibold },
-  navTitle: { fontSize: 15, fontWeight: Typography.bold, color: C.text },
-  editText: { fontSize: 15, color: C.primary, fontWeight: Typography.semibold },
+  back: { fontSize: 14, color: C.primary, fontFamily: Families.bold },
+  navTitle: { fontSize: 16, fontFamily: Families.display, color: C.text },
+  editText: { fontSize: 14, color: C.primary, fontFamily: Families.bold },
 
   content: { padding: 24, gap: 28, paddingBottom: 60 },
 
   profileTop: { alignItems: "center", gap: 6 },
-  avatarWrap: { position: "relative", marginBottom: 4 },
+  avatarWrap: {
+    position: "relative",
+    marginBottom: 4,
+    borderWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
+    borderRadius: 44,
+    ...Brutalist.cardShadow,
+  },
   avatarLoader: {
     width: 80,
     height: 80,
@@ -361,47 +352,52 @@ const styles = StyleSheet.create({
   },
   editBadge: {
     position: "absolute",
-    bottom: 0,
-    right: 0,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    bottom: -2,
+    right: -2,
+    width: 26,
+    height: 26,
+    borderRadius: 6,
     backgroundColor: C.surface,
-    borderWidth: 1,
-    borderColor: C.border,
+    borderWidth: 1.5,
+    borderColor: C.ink,
     justifyContent: "center",
     alignItems: "center",
+    ...Brutalist.btnShadow,
   },
-  username: { fontSize: 18, fontWeight: Typography.bold, color: C.text },
-  email: { fontSize: 13, color: C.muted },
+  username: { fontSize: 20, fontFamily: Families.display, color: C.text },
+  email: { fontSize: 13, fontFamily: Families.regular, color: C.muted },
 
   statsCard: {
     backgroundColor: C.surface,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: C.border,
+    borderRadius: 12,
+    borderWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
+    ...Brutalist.cardShadow,
     flexDirection: "row",
     padding: 16,
   },
   stat: { flex: 1, alignItems: "center", gap: 2 },
-  statValue: { fontSize: 20, fontWeight: Typography.bold, color: C.text },
-  statLabel: { fontSize: 11, color: C.muted, textAlign: "center" },
-  statDiv: { width: 1, backgroundColor: C.border },
+  statValue: { fontSize: 20, fontFamily: Families.bold, color: C.text },
+  statLabel: { fontSize: 10, fontFamily: Families.bold, color: C.muted, textTransform: "uppercase", letterSpacing: 0.5, textAlign: "center" },
+  statDiv: { width: 2, backgroundColor: C.ink },
 
   section: { gap: 10 },
   sectionLabel: {
-    fontSize: 12,
-    fontWeight: Typography.semibold,
+    fontSize: 11,
+    fontFamily: Families.bold,
     color: C.muted,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
-  bioText: { fontSize: 15, color: C.text, lineHeight: 22 },
+  bioText: { fontSize: 14, fontFamily: Families.regular, color: C.text, lineHeight: 20 },
   bioInput: {
     backgroundColor: C.surface,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 10,
+    borderWidth: 1.8,
+    borderColor: C.ink,
+    borderRadius: 8,
     padding: 13,
-    fontSize: 15,
+    fontSize: 14,
+    fontFamily: Families.medium,
     color: C.text,
     minHeight: 80,
     textAlignVertical: "top",
@@ -409,33 +405,38 @@ const styles = StyleSheet.create({
   saveBtn: {
     backgroundColor: C.primary,
     padding: 13,
-    borderRadius: 10,
+    borderRadius: 8,
+    borderWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
+    ...Brutalist.btnShadow,
     alignItems: "center",
   },
-  saveBtnText: { color: C.surface, fontWeight: Typography.bold, fontSize: 14 },
+  saveBtnText: { color: C.surface, fontFamily: Families.bold, fontSize: 14 },
 
   logoutBtn: {
-    backgroundColor: C.surface,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: C.border,
+    backgroundColor: C.surfaceWarm,
+    borderRadius: 8,
+    borderWidth: Brutalist.borderWidth,
+    borderColor: C.danger,
     padding: 14,
+    ...Brutalist.btnShadow,
     alignItems: "center",
   },
   logoutText: {
     fontSize: 14,
-    fontWeight: Typography.semibold,
-    color: C.accent,
+    fontFamily: Families.bold,
+    color: C.danger,
   },
 
-  planList: { gap: 10 },
+  planList: { gap: 12 },
   planCard: {
     backgroundColor: C.surface,
-    borderWidth: 1,
-    borderColor: C.border,
+    borderWidth: 1.8,
+    borderColor: C.ink,
     borderRadius: 10,
+    ...Brutalist.cardShadow,
     padding: 12,
-    gap: 4,
+    gap: 6,
   },
   planTop: {
     flexDirection: "row",
@@ -447,27 +448,22 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     color: C.text,
-    fontWeight: Typography.semibold,
+    fontFamily: Families.bold,
   },
   planVisibility: {
-    textTransform: "capitalize",
-    fontSize: 11,
+    textTransform: "uppercase",
+    fontSize: 10,
+    fontFamily: Families.bold,
     color: C.primary,
-    backgroundColor: C.sand,
+    backgroundColor: C.surfaceWarm,
+    borderWidth: 1.2,
+    borderColor: C.ink,
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 99,
+    borderRadius: 4,
+    transform: [{ rotate: "1deg" }],
   },
   metaLine: { flexDirection: "row", alignItems: "center", gap: 5 },
-  planMeta: { flex: 1, fontSize: 13, color: C.muted },
+  planMeta: { flex: 1, fontSize: 12, fontFamily: Families.medium, color: C.muted },
 
-  suggestionCard: {
-    backgroundColor: C.surface,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 10,
-    padding: 12,
-    gap: 7,
-  },
-  suggestionText: { fontSize: 14, color: C.text, lineHeight: 20 },
 });

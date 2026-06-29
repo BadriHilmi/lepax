@@ -23,18 +23,18 @@ function TabIcon({ name, focused }) {
   return (
     <View
       style={{
-        width: 32,
+        width: 36,
         height: 24,
         borderRadius: 12,
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: focused ? C.surfaceWarm : "transparent",
+        backgroundColor: focused ? "rgba(255, 255, 255, 0.08)" : "transparent",
       }}
     >
       <AppIcon
         name={name}
         size={20}
-        color={focused ? C.primary : C.muted}
+        color={focused ? C.aqua : "rgba(255, 255, 255, 0.4)"}
       />
     </View>
   );
@@ -46,16 +46,15 @@ function MainTabs() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: C.surface,
-          borderTopWidth: 1,
-          borderTopColor: C.border,
+          backgroundColor: C.ink,
+          borderTopWidth: 0,
           elevation: 0,
           shadowOpacity: 0,
           height: 64,
           paddingTop: 6,
         },
-        tabBarActiveTintColor: C.primary,
-        tabBarInactiveTintColor: C.muted,
+        tabBarActiveTintColor: C.aqua,
+        tabBarInactiveTintColor: "rgba(255, 255, 255, 0.4)",
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: Typography.semibold,

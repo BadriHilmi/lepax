@@ -25,8 +25,20 @@ export const C = {
   danger: "#E57373",
 };
 
-// ─── Vibe Tags ────────────────────────────────────────────────────────────────
-export const VIBES = ["chill", "foodie", "adventure", "budget", "spontaneous"];
+export const VIBES = [
+  "chill",
+  "foodie",
+  "adventure",
+  "budget",
+  "spontaneous",
+  "sports",
+  "luxury",
+  "culture",
+  "nature",
+  "nightlife",
+  "wellness",
+  "roadtrip"
+];
 
 export const VIBE_COLORS = {
   chill: { bg: "#DDF1E7", text: "#17766A", border: "#B7DDCE" },
@@ -34,9 +46,24 @@ export const VIBE_COLORS = {
   adventure: { bg: "#E5EBC8", text: "#5B6F1D", border: "#C9D685" },
   budget: { bg: "#FFF1BE", text: "#856118", border: "#E8CB6F" },
   spontaneous: { bg: "#DCEAFB", text: "#2B5F8C", border: "#AFCBEA" },
+  sports: { bg: "#FFDDE2", text: "#A32D4B", border: "#F5B4BE" },
+  luxury: { bg: "#E2D3FD", text: "#522D85", border: "#BEACF5" },
+  culture: { bg: "#FDEDD0", text: "#9B5D14", border: "#EBC28F" },
+  nature: { bg: "#E2F0D8", text: "#3E6B27", border: "#BEDBB3" },
+  nightlife: { bg: "#FFDEF7", text: "#B32885", border: "#F7ADDD" },
+  wellness: { bg: "#D2FAF8", text: "#227D79", border: "#A1EBE7" },
+  roadtrip: { bg: "#FFF2D2", text: "#8A6922", border: "#EED195" },
 };
 
 // ─── Typography ───────────────────────────────────────────────────────────────
+export const Families = {
+  display: "Syne-Bold",
+  regular: "PlusJakartaSans-Regular",
+  medium: "PlusJakartaSans-Medium",
+  semibold: "PlusJakartaSans-SemiBold",
+  bold: "PlusJakartaSans-Bold",
+};
+
 export const Typography = {
   xs: 10,
   sm: 12,
@@ -68,35 +95,52 @@ export const Spacing = {
 
 // ─── Border Radius ────────────────────────────────────────────────────────────
 export const BorderRadius = {
-  sm: 6,
+  sm: 4,
   md: 8,
-  lg: 10, // Lepax default — kept intentionally tighter
-  xl: 12,
+  lg: 10,
+  xl: 14,
   full: 999,
 };
 
-// ─── Shadows ──────────────────────────────────────────────────────────────────
+// ─── Neo-Brutalist Layout System ──────────────────────────────────────────────
+export const Brutalist = {
+  borderWidth: 2.2,
+  borderColor: C.ink,
+  cardShadow: {
+    shadowColor: C.ink,
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
+  },
+  btnShadow: {
+    shadowColor: C.ink,
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 3,
+  },
+  tiltedLabel: {
+    transform: [{ rotate: "-1deg" }],
+  },
+};
+
+// ─── Shadows (Standard Fallback) ──────────────────────────────────────────────
 export const Shadows = {
   small: {
-    elevation: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.07,
-    shadowRadius: 4,
+    borderWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
+    ...Brutalist.cardShadow,
   },
   medium: {
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    borderWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
+    ...Brutalist.cardShadow,
   },
   brand: {
-    elevation: 5,
-    shadowColor: C.ink,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.12,
-    shadowRadius: 18,
+    borderWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
+    ...Brutalist.cardShadow,
   },
 };
 
@@ -111,24 +155,26 @@ export const GlobalStyles = StyleSheet.create({
   // Cards
   card: {
     backgroundColor: C.surface,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.md,
     padding: Spacing.lg,
-    borderWidth: 1,
-    borderColor: C.border,
-    ...Shadows.small,
+    borderWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
+    ...Brutalist.cardShadow,
   },
 
   // Text
   textPrimary: {
+    fontFamily: Families.semibold,
     fontSize: Typography.base,
-    fontWeight: Typography.semibold,
     color: C.text,
   },
   textSecondary: {
+    fontFamily: Families.regular,
     fontSize: Typography.base,
     color: C.muted,
   },
   textMuted: {
+    fontFamily: Families.regular,
     fontSize: Typography.sm,
     color: C.muted,
   },
@@ -137,41 +183,48 @@ export const GlobalStyles = StyleSheet.create({
   btn: {
     backgroundColor: C.primary,
     padding: Spacing.lg,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.md,
+    borderWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
+    ...Brutalist.btnShadow,
     alignItems: "center",
+    justifyContent: "center",
   },
   btnText: {
     color: C.surface,
     fontSize: Typography.lg,
-    fontWeight: Typography.bold,
+    fontFamily: Families.bold,
   },
   btnOutline: {
-    backgroundColor: C.surface,
-    borderWidth: 1,
-    borderColor: C.border,
+    backgroundColor: C.surfaceWarm,
+    borderWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
     padding: Spacing.lg,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.md,
+    ...Brutalist.btnShadow,
     alignItems: "center",
+    justifyContent: "center",
   },
   btnOutlineText: {
     color: C.text,
     fontSize: Typography.lg,
-    fontWeight: Typography.semibold,
+    fontFamily: Families.bold,
   },
 
   // Input
   input: {
     backgroundColor: C.surface,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: BorderRadius.lg,
+    borderWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
+    borderRadius: BorderRadius.md,
     padding: Spacing.md,
     fontSize: Typography.md,
+    fontFamily: Families.medium,
     color: C.text,
   },
   inputLabel: {
     fontSize: Typography.sm,
-    fontWeight: Typography.semibold,
+    fontFamily: Families.bold,
     color: C.text,
     marginBottom: Spacing.xs,
   },
@@ -184,19 +237,19 @@ export const GlobalStyles = StyleSheet.create({
     paddingHorizontal: Spacing.xl,
     paddingBottom: Spacing.md,
     backgroundColor: C.bg,
-    borderBottomWidth: 1,
-    borderColor: C.border,
+    borderBottomWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
   },
   navTitle: {
     fontSize: Typography.lg,
-    fontWeight: Typography.bold,
+    fontFamily: Families.display,
     color: C.text,
   },
 
   // Divider
   divider: {
-    height: 1,
-    backgroundColor: C.border,
+    height: Brutalist.borderWidth,
+    backgroundColor: Brutalist.borderColor,
     marginVertical: Spacing.md,
   },
 
@@ -211,13 +264,16 @@ export const GlobalStyles = StyleSheet.create({
     backgroundColor: C.sand,
     width: 72,
     height: 72,
-    borderRadius: 36,
+    borderRadius: BorderRadius.md,
+    borderWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: Spacing.lg,
   },
   emptyStateText: {
     fontSize: Typography.lg,
+    fontFamily: Families.medium,
     color: C.muted,
     textAlign: "center",
     lineHeight: 22,

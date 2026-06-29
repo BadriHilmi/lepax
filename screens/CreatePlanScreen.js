@@ -10,15 +10,18 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  StatusBar,
 } from "react-native";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
-import { C, Typography, VIBES } from "../constants/theme";
+import { C, Typography, VIBES, Families, Brutalist } from "../constants/theme";
 import DatePickerInput from "../components/DatePickerInput";
 import MapPicker from "../components/MapPicker";
 import FormField from "../components/FormField";
 import AppIcon from "../components/AppIcon";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { formatTimeDisplay } from "../utils/date";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -409,6 +412,7 @@ export default function CreatePlanScreen({ navigation }) {
             onUpdate={updateStop}
             onRemove={removeStop}
             onAdd={addStop}
+            mainLocation={location}
           />
         )}
 
@@ -614,50 +618,175 @@ function StepDetails({
   );
 }
 
-function StepItinerary({ itinerary, onUpdate, onRemove, onAdd }) {
+function StepItinerary({ itinerary, onUpdate, onRemove, onAdd, mainLocation }) {
+  const [activeStopId, setActiveStopId] = useState(null);
+
+  const parseTimeToMinutes = (timeStr) => {
+    if (!timeStr) return null;
+    const cleanStr = timeStr.trim().toUpperCase();
+
+    // 1. Matches "8 AM", "12 PM", "08 AM", etc.
+    const hourAmPmRegex = /^(\d+)\s*(AM|PM)$/;
+    const matchHourAmPm = cleanStr.match(hourAmPmRegex);
+    if (matchHourAmPm) {
+      let hours = parseInt(matchHourAmPm[1], 10);
+      const ampm = matchHourAmPm[2];
+      if (ampm === "PM" && hours < 12) hours += 12;
+      if (ampm === "AM" && hours === 12) hours = 0;
+      return hours * 60;
+    }
+
+    // 2. Matches "8:30 AM", "12:00 PM", etc.
+    const fullAmPmRegex = /^(\d+):(\d+)\s*(AM|PM)$/;
+    const matchFullAmPm = cleanStr.match(fullAmPmRegex);
+    if (matchFullAmPm) {
+      let hours = parseInt(matchFullAmPm[1], 10);
+      const minutes = parseInt(matchFullAmPm[2], 10);
+      const ampm = matchFullAmPm[3];
+      if (ampm === "PM" && hours < 12) hours += 12;
+      if (ampm === "AM" && hours === 12) hours = 0;
+      return hours * 60 + minutes;
+    }
+
+    // 3. Matches "14:30", "08:00", etc. (24h)
+    const regex24 = /^(\d+):(\d+)$/;
+    const match24 = cleanStr.match(regex24);
+    if (match24) {
+      const hours = parseInt(match24[1], 10);
+      const minutes = parseInt(match24[2], 10);
+      return hours * 60 + minutes;
+    }
+
+    return null;
+  };
+
+  const getInitialPickerDate = () => {
+    if (!activeStopId) return new Date();
+    const index = itinerary.findIndex((item) => item.id === activeStopId);
+    let referenceTimeStr = null;
+    for (let j = index - 1; j >= 0; j--) {
+      if (itinerary[j].time) {
+        referenceTimeStr = itinerary[j].time;
+        break;
+      }
+    }
+    const d = new Date();
+    d.setMinutes(0, 0, 0);
+    if (referenceTimeStr) {
+      const parsed = parseTimeToMinutes(referenceTimeStr);
+      if (parsed !== null) {
+        const hours = Math.floor(parsed / 60);
+        d.setHours(hours, 0, 0, 0);
+        return d;
+      }
+    }
+    return d;
+  };
+
+  const handleTimeConfirm = (date) => {
+    if (activeStopId) {
+      date.setMinutes(0, 0, 0);
+      let hours = date.getHours();
+      const ampm = hours >= 12 ? "PM" : "AM";
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      const formattedTime = `${hours} ${ampm}`;
+      onUpdate(activeStopId, "time", formattedTime);
+    }
+    setActiveStopId(null);
+  };
+
   return (
     <View style={styles.form}>
-      {itinerary.map((item, i) => (
-        <View key={item.id} style={styles.stopCard}>
-          <View style={styles.stopHeader}>
-            <Text style={styles.stopNum}>Stop {i + 1}</Text>
-            {itinerary.length > 1 && (
-              <TouchableOpacity
-                onPress={() => onRemove(item.id)}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              >
-                <Text style={styles.removeText}>Remove</Text>
-              </TouchableOpacity>
-            )}
-          </View>
+      {itinerary.map((item, i) => {
+        const showUseMainLocation =
+          mainLocation?.trim() &&
+          item.location !== mainLocation &&
+          !item.location?.trim();
 
-          <TextInput
-            style={styles.input}
-            placeholder="Time (e.g. 10:00am)"
-            placeholderTextColor={C.muted}
-            value={item.time}
-            onChangeText={(v) => onUpdate(item.id, "time", v)}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Activity"
-            placeholderTextColor={C.muted}
-            value={item.activity}
-            onChangeText={(v) => onUpdate(item.id, "activity", v)}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Location (optional)"
-            placeholderTextColor={C.muted}
-            value={item.location}
-            onChangeText={(v) => onUpdate(item.id, "location", v)}
-          />
-        </View>
-      ))}
+        return (
+          <View key={item.id} style={styles.timelineStopRow}>
+            {/* Left Column: Time Picker Trigger */}
+            <View style={styles.timelineTimeCol}>
+              <TouchableOpacity
+                style={[styles.timePickerBtn, !item.time && styles.timePickerBtnEmpty]}
+                onPress={() => setActiveStopId(item.id)}
+                activeOpacity={0.8}
+              >
+                <AppIcon name="clock" size={13} color={item.time ? C.primary : C.muted} />
+                <Text style={[styles.timePickerText, !item.time && styles.timePickerTextEmpty]}>
+                  {item.time || "Set time"}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Middle Column: Node and vertical line */}
+            <View style={styles.timelineDotCol}>
+              <View style={styles.timelineDot} />
+              {i < itinerary.length - 1 && <View style={styles.timelineConnector} />}
+            </View>
+
+            {/* Right Column: Inputs */}
+            <View style={styles.timelineInputCol}>
+              <View style={styles.stopCardBody}>
+                <View style={styles.activityRow}>
+                  <TextInput
+                    style={styles.activityInput}
+                    placeholder={`Stop ${i + 1} activity`}
+                    placeholderTextColor={C.muted}
+                    value={item.activity}
+                    onChangeText={(v) => onUpdate(item.id, "activity", v)}
+                  />
+                  {itinerary.length > 1 && (
+                    <TouchableOpacity
+                      onPress={() => onRemove(item.id)}
+                      style={styles.trashBtn}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                      <AppIcon name="trash" size={15} color={C.danger} />
+                    </TouchableOpacity>
+                  )}
+                </View>
+
+                <TextInput
+                  style={styles.locationInput}
+                  placeholder="Location (optional)"
+                  placeholderTextColor={C.muted}
+                  value={item.location}
+                  onChangeText={(v) => onUpdate(item.id, "location", v)}
+                />
+
+                {/* Main Location Suggestion Pill */}
+                {!!showUseMainLocation && (
+                  <TouchableOpacity
+                    style={styles.suggestPill}
+                    onPress={() => onUpdate(item.id, "location", mainLocation)}
+                    activeOpacity={0.8}
+                  >
+                    <AppIcon name="mapPin" size={11} color={C.primary} />
+                    <Text style={styles.suggestPillText} numberOfLines={1}>
+                      Use "{mainLocation}"
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+          </View>
+        );
+      })}
 
       <TouchableOpacity style={styles.addStopBtn} onPress={onAdd}>
         <Text style={styles.addStopText}>+ Add stop</Text>
       </TouchableOpacity>
+
+      <DateTimePickerModal
+        isVisible={activeStopId !== null}
+        mode="time"
+        minuteInterval={60}
+        date={getInitialPickerDate()}
+        onConfirm={handleTimeConfirm}
+        onCancel={() => setActiveStopId(null)}
+      />
     </View>
   );
 }
@@ -698,54 +827,57 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === "ios" ? 56 : 20,
+    paddingTop: Platform.OS === "ios" ? 56 : (StatusBar.currentHeight || 0) + 12,
     paddingBottom: 12,
   },
-  back: { fontSize: 15, color: C.primary, fontWeight: Typography.semibold },
-  navTitle: { fontSize: 15, fontWeight: Typography.bold, color: C.text },
-  stepCount: { fontSize: 13, color: C.muted, width: 40, textAlign: "right" },
+  back: { fontSize: 14, color: C.primary, fontFamily: Families.bold },
+  navTitle: { fontSize: 16, fontFamily: Families.display, color: C.text },
+  stepCount: { fontSize: 12, fontFamily: Families.bold, color: C.muted, width: 40, textAlign: "right" },
 
-  progressTrack: { height: 2, backgroundColor: C.border },
-  progressFill: { height: 2, backgroundColor: C.primary },
+  progressTrack: { height: 4, backgroundColor: C.border, borderRadius: 2 },
+  progressFill: { height: 4, backgroundColor: C.primary, borderRadius: 2 },
 
   content: { padding: 24, paddingBottom: 120, gap: 20 },
-  stepTitle: { fontSize: 20, fontWeight: Typography.bold, color: C.text },
+  stepTitle: { fontSize: 20, fontFamily: Families.display, color: C.text },
 
   // Visibility
-  visOptions: { gap: 10 },
+  visOptions: { gap: 12 },
   visCard: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
     backgroundColor: C.surface,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: C.border,
+    borderRadius: 8,
+    borderWidth: 1.8,
+    borderColor: C.ink,
     padding: 16,
   },
-  visCardActive: { borderColor: C.primary },
+  visCardActive: {
+    backgroundColor: C.surfaceWarm,
+    ...Brutalist.cardShadow,
+  },
   visIcon: {
     width: 40,
     height: 40,
-    borderRadius: 12,
+    borderRadius: 6,
     backgroundColor: C.surfaceWarm,
-    borderWidth: 1,
-    borderColor: C.border,
+    borderWidth: 1.5,
+    borderColor: C.ink,
     justifyContent: "center",
     alignItems: "center",
   },
   visIconActive: {
     backgroundColor: C.primary,
-    borderColor: C.primary,
+    borderColor: C.ink,
   },
-  visLabel: { fontSize: 15, fontWeight: Typography.semibold, color: C.text },
-  visDesc: { fontSize: 12, color: C.muted, marginTop: 2 },
+  visLabel: { fontSize: 15, fontFamily: Families.bold, color: C.text },
+  visDesc: { fontSize: 12, fontFamily: Families.regular, color: C.muted, marginTop: 2 },
   radio: {
     width: 20,
     height: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: C.border,
+    borderColor: C.ink,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -759,14 +891,15 @@ const styles = StyleSheet.create({
 
   // Form
   form: { gap: 16 },
-  fieldLabel: { fontSize: 13, fontWeight: Typography.semibold, color: C.text },
+  fieldLabel: { fontSize: 12, fontFamily: Families.bold, color: C.text },
   input: {
     backgroundColor: C.surface,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 10,
+    borderWidth: 1.8,
+    borderColor: C.ink,
+    borderRadius: 6,
     padding: 13,
-    fontSize: 15,
+    fontSize: 14,
+    fontFamily: Families.medium,
     color: C.text,
   },
 
@@ -777,80 +910,86 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 8,
   },
-  inlineSearchText: { fontSize: 12, color: C.muted },
+  inlineSearchText: { fontSize: 12, fontFamily: Families.regular, color: C.muted },
   suggestions: {
     marginTop: 8,
     backgroundColor: C.surface,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 10,
+    borderWidth: 1.8,
+    borderColor: C.ink,
+    borderRadius: 8,
     overflow: "hidden",
   },
   suggestionItem: {
     paddingHorizontal: 14,
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: C.border,
+    borderBottomWidth: 1.5,
+    borderBottomColor: C.ink,
   },
   suggestionItemLast: { borderBottomWidth: 0 },
-  suggestionTitle: { fontSize: 14, color: C.text, lineHeight: 20 },
+  suggestionTitle: { fontSize: 14, fontFamily: Families.medium, color: C.text, lineHeight: 20 },
   findBtn: {
     backgroundColor: C.primary,
     paddingVertical: 12,
-    borderRadius: 10,
+    borderRadius: 6,
+    borderWidth: 1.8,
+    borderColor: C.ink,
+    ...Brutalist.btnShadow,
     alignItems: "center",
   },
   findBtnDisabled: { opacity: 0.6 },
   findBtnContent: { flexDirection: "row", alignItems: "center", gap: 7 },
-  findBtnText: { color: C.surface, fontWeight: Typography.bold, fontSize: 14 },
-  coordHint: { fontSize: 12, color: C.muted, marginTop: -4 },
+  findBtnText: { color: C.surface, fontFamily: Families.bold, fontSize: 14 },
+  coordHint: { fontSize: 12, fontFamily: Families.regular, color: C.muted, marginTop: -4 },
 
   // Itinerary
-  stopCard: {
-    backgroundColor: C.surface,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: C.border,
-    padding: 14,
-    gap: 8,
-  },
-  stopHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 4,
-  },
-  stopNum: { fontSize: 13, fontWeight: Typography.semibold, color: C.muted },
-  removeText: { fontSize: 13, color: C.accent },
+  timelineStopRow: { flexDirection: "row", gap: 10, marginBottom: 8 },
+  timelineTimeCol: { width: 95, alignItems: "flex-end", paddingTop: 10 },
+  timePickerBtn: { flexDirection: "row", alignItems: "center", gap: 5, backgroundColor: C.surfaceWarm, borderWidth: 1.5, borderColor: C.ink, borderRadius: 6, paddingHorizontal: 8, paddingVertical: 7 },
+  timePickerBtnEmpty: { backgroundColor: C.surface, borderStyle: "dashed" },
+  timePickerText: { fontSize: 12, fontFamily: Families.bold, color: C.primary },
+  timePickerTextEmpty: { color: C.muted },
+  timelineDotCol: { alignItems: "center", width: 12, paddingTop: 16 },
+  timelineDot: { width: 10, height: 10, borderRadius: 5, borderWidth: 1.5, borderColor: C.ink, backgroundColor: C.primary },
+  timelineConnector: { width: 2, flex: 1, backgroundColor: C.ink, marginTop: 6, marginBottom: -16 },
+  timelineInputCol: { flex: 1 },
+  stopCardBody: { backgroundColor: C.surface, borderRadius: 8, borderWidth: 1.8, borderColor: C.ink, ...Brutalist.cardShadow, padding: 12, gap: 8 },
+  activityRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  activityInput: { flex: 1, borderWidth: 0, borderBottomWidth: 1.5, borderBottomColor: C.ink, paddingHorizontal: 2, paddingVertical: 5, fontSize: 14, color: C.text, fontFamily: Families.semibold },
+  locationInput: { borderWidth: 0, borderBottomWidth: 1.5, borderBottomColor: C.ink, paddingHorizontal: 2, paddingVertical: 4, fontSize: 13, color: C.text, fontFamily: Families.regular },
+  trashBtn: { padding: 4 },
+  suggestPill: { flexDirection: "row", alignItems: "center", gap: 4, alignSelf: "flex-start", backgroundColor: C.surfaceWarm, borderRadius: 6, borderWidth: 1.5, borderColor: C.ink, paddingHorizontal: 8, paddingVertical: 4, marginTop: 2, maxWidth: "100%" },
+  suggestPillText: { fontSize: 11, fontFamily: Families.medium, color: C.primary },
   addStopBtn: {
-    borderWidth: 1,
-    borderColor: C.border,
+    borderWidth: 1.8,
+    borderColor: C.ink,
     borderStyle: "dashed",
-    borderRadius: 10,
+    borderRadius: 8,
     padding: 13,
     alignItems: "center",
+    marginTop: 8,
   },
   addStopText: {
     fontSize: 14,
-    fontWeight: Typography.semibold,
+    fontFamily: Families.bold,
     color: C.primary,
   },
 
   // Vibes
-  vibeHint: { fontSize: 13, color: C.muted },
+  vibeHint: { fontSize: 13, fontFamily: Families.regular, color: C.muted },
   vibeGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   vibeChip: {
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: C.border,
+    borderRadius: 6,
+    borderWidth: 1.8,
+    borderColor: C.ink,
     backgroundColor: C.surface,
+    ...Brutalist.btnShadow,
   },
-  vibeChipActive: { backgroundColor: C.primary, borderColor: C.primary },
+  vibeChipActive: { backgroundColor: C.primary },
   vibeChipText: {
     fontSize: 14,
-    fontWeight: Typography.semibold,
+    fontFamily: Families.bold,
     color: C.text,
   },
   vibeChipTextActive: { color: C.surface },
@@ -864,15 +1003,18 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: Platform.OS === "ios" ? 36 : 20,
     backgroundColor: C.surface,
-    borderTopWidth: 2,
-    borderColor: C.border,
+    borderTopWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
   },
   nextBtn: {
     backgroundColor: C.primary,
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 8,
+    borderWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
+    ...Brutalist.btnShadow,
     alignItems: "center",
   },
   nextBtnDisabled: { opacity: 0.4 },
-  nextBtnText: { color: C.surface, fontWeight: Typography.bold, fontSize: 15 },
+  nextBtnText: { color: C.surface, fontFamily: Families.bold, fontSize: 15 },
 });

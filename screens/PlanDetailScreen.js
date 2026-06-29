@@ -9,6 +9,7 @@ import {
   Platform,
   Alert,
   ActivityIndicator,
+  StatusBar,
 } from "react-native";
 import {
   doc,
@@ -23,16 +24,19 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
-import { C, Typography } from "../constants/theme";
+import { C, Typography, Families, Brutalist } from "../constants/theme";
 import VibeTag from "../components/VibeTag";
 import Avatar from "../components/Avatar";
 import AlertBox from "../components/AlertBox";
+import ScaleButton from "../components/ScaleButton";
 import MapPicker from "../components/MapPicker";
 import AppIcon from "../components/AppIcon";
+import { useToast } from "../context/ToastContext";
 
 export default function PlanDetailScreen({ route, navigation }) {
   const { planId } = route.params;
   const { user, profile } = useAuth();
+  const { showToast } = useToast();
   const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState(false);
@@ -84,7 +88,7 @@ export default function PlanDetailScreen({ route, navigation }) {
         setPlan((p) => ({ ...p, joinedBy: [...(p.joinedBy ?? []), user.uid] }));
       }
     } catch (err) {
-      Alert.alert("Error", err.message);
+      showToast(err.message, "error");
     } finally {
       setJoining(false);
     }
@@ -123,7 +127,7 @@ export default function PlanDetailScreen({ route, navigation }) {
         ]
       );
     } catch (err) {
-      Alert.alert("Error", err.message);
+      showToast(err.message, "error");
     } finally {
       setForking(false);
     }
@@ -288,20 +292,18 @@ export default function PlanDetailScreen({ route, navigation }) {
       {/* Action bar */}
       <View style={styles.actionBar}>
         {isHost ? (
-          <TouchableOpacity
+          <ScaleButton
             style={styles.cancelPlanBtn}
             onPress={handleCancel}
-            activeOpacity={0.85}
           >
             <Text style={styles.cancelPlanBtnText}>Cancel plan</Text>
-          </TouchableOpacity>
+          </ScaleButton>
         ) : (
           <>
-            <TouchableOpacity
+            <ScaleButton
               style={[styles.joinBtn, isJoined && styles.joinBtnActive]}
               onPress={handleJoin}
               disabled={joining}
-              activeOpacity={0.85}
             >
               {joining ? (
                 <ActivityIndicator color="#fff" />
@@ -310,12 +312,11 @@ export default function PlanDetailScreen({ route, navigation }) {
                   {isJoined ? "Joined ✓" : "Join plan"}
                 </Text>
               )}
-            </TouchableOpacity>
-            <TouchableOpacity
+            </ScaleButton>
+            <ScaleButton
               style={styles.forkBtn}
               onPress={handleFork}
               disabled={forking}
-              activeOpacity={0.85}
             >
               {forking ? (
                 <ActivityIndicator color={C.text} />
@@ -325,7 +326,7 @@ export default function PlanDetailScreen({ route, navigation }) {
                   <Text style={styles.forkBtnText}>Fork</Text>
                 </View>
               )}
-            </TouchableOpacity>
+            </ScaleButton>
           </>
         )}
       </View>
@@ -377,43 +378,46 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === "ios" ? 56 : 20,
+    paddingTop: Platform.OS === "ios" ? 56 : (StatusBar.currentHeight || 0) + 12,
     paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderColor: C.border,
+    borderBottomWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
   },
-  back: { fontSize: 15, color: C.primary, fontWeight: Typography.semibold },
+  back: { fontSize: 14, color: C.primary, fontFamily: Families.bold },
   cancelText: {
-    fontSize: 15,
+    fontSize: 14,
     color: C.danger,
-    fontWeight: Typography.semibold,
+    fontFamily: Families.bold,
   },
-  navTitle: { fontSize: 15, fontWeight: Typography.bold, color: C.text },
+  navTitle: { fontSize: 16, fontFamily: Families.display, color: C.text },
 
   content: { padding: 20, paddingBottom: 120, gap: 24 },
 
   section: { gap: 10 },
   sectionLabel: {
-    fontSize: 12,
-    fontWeight: Typography.semibold,
+    fontSize: 11,
+    fontFamily: Families.bold,
     color: C.muted,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
 
   planTitle: {
     fontSize: 24,
-    fontWeight: Typography.bold,
+    fontFamily: Families.display,
     color: C.text,
-    lineHeight: 30,
+    lineHeight: 28,
   },
   hostRow: { flexDirection: "row", alignItems: "center", gap: 10 },
-  hostName: { fontSize: 14, fontWeight: Typography.semibold, color: C.primary },
-  forkedFrom: { fontSize: 12, color: C.muted, marginTop: 1 },
+  hostName: { fontSize: 14, fontFamily: Families.bold, color: C.primary },
+  forkedFrom: { fontSize: 11, fontFamily: Families.regular, color: C.muted, marginTop: 1 },
 
   detailsCard: {
     backgroundColor: C.surface,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: C.border,
+    borderRadius: 12,
+    borderWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
+    ...Brutalist.cardShadow,
     overflow: "hidden",
   },
   detailRow: {
@@ -425,43 +429,47 @@ const styles = StyleSheet.create({
   detailIcon: {
     width: 28,
     height: 28,
-    borderRadius: 9,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: C.ink,
     backgroundColor: C.surfaceWarm,
     justifyContent: "center",
     alignItems: "center",
   },
-  detailLabel: { fontSize: 13, color: C.muted, flex: 1 },
-  detailValue: { fontSize: 14, fontWeight: Typography.semibold, color: C.text },
-  divider: { height: 1, backgroundColor: C.border, marginHorizontal: 14 },
+  detailLabel: { fontSize: 13, fontFamily: Families.medium, color: C.muted, flex: 1 },
+  detailValue: { fontSize: 13, fontFamily: Families.bold, color: C.text },
+  divider: { height: 1.5, backgroundColor: C.ink, marginHorizontal: 14 },
 
   vibesRow: { flexDirection: "row", gap: 8, flexWrap: "wrap" },
 
   timelineItem: { flexDirection: "row", gap: 12, marginBottom: 0 },
-  timelineDotCol: { alignItems: "center", width: 10 },
+  timelineDotCol: { alignItems: "center", width: 14 },
   dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: C.primary,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: C.ink,
+    backgroundColor: C.sun,
     marginTop: 4,
   },
   line: {
-    width: 1,
+    width: 2,
     flex: 1,
-    backgroundColor: C.border,
+    backgroundColor: C.ink,
     marginTop: 4,
     minHeight: 24,
   },
   timelineBody: { flex: 1, paddingBottom: 20 },
   timeTime: {
     fontSize: 11,
-    color: C.muted,
-    fontWeight: Typography.semibold,
+    color: C.accent,
+    fontFamily: Families.bold,
     marginBottom: 2,
   },
   timeActivity: {
     fontSize: 15,
-    fontWeight: Typography.semibold,
+    fontFamily: Families.semibold,
     color: C.text,
   },
   timeLocRow: {
@@ -470,7 +478,7 @@ const styles = StyleSheet.create({
     gap: 4,
     marginTop: 3,
   },
-  timeLoc: { fontSize: 12, color: C.muted },
+  timeLoc: { fontSize: 12, fontFamily: Families.medium, color: C.muted },
 
   actionBar: {
     position: "absolute",
@@ -482,40 +490,47 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: Platform.OS === "ios" ? 36 : 20,
     backgroundColor: C.surface,
-    borderTopWidth: 1,
-    borderColor: C.border,
+    borderTopWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
   },
   joinBtn: {
     flex: 1,
     backgroundColor: C.primary,
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 8,
+    borderWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
+    ...Brutalist.btnShadow,
     alignItems: "center",
   },
   joinBtnActive: { backgroundColor: "#5A7A4A" },
-  joinBtnText: { color: C.surface, fontWeight: Typography.bold, fontSize: 15 },
+  joinBtnText: { color: C.surface, fontFamily: Families.bold, fontSize: 15 },
   forkBtn: {
-    borderWidth: 1,
-    borderColor: C.border,
+    backgroundColor: C.surfaceWarm,
+    borderWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
     paddingHorizontal: 20,
     paddingVertical: 15,
-    borderRadius: 10,
+    borderRadius: 8,
+    ...Brutalist.btnShadow,
     alignItems: "center",
     justifyContent: "center",
   },
   forkBtnContent: { flexDirection: "row", alignItems: "center", gap: 6 },
-  forkBtnText: { color: C.text, fontWeight: Typography.semibold, fontSize: 15 },
+  forkBtnText: { color: C.text, fontFamily: Families.bold, fontSize: 15 },
   cancelPlanBtn: {
     flex: 1,
-    borderWidth: 1,
+    backgroundColor: C.surfaceWarm,
+    borderWidth: Brutalist.borderWidth,
     borderColor: C.danger,
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 8,
+    ...Brutalist.btnShadow,
     alignItems: "center",
   },
   cancelPlanBtnText: {
     color: C.danger,
-    fontWeight: Typography.bold,
+    fontFamily: Families.bold,
     fontSize: 15,
   },
 });

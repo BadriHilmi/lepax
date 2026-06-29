@@ -25,6 +25,7 @@ import {
   UserPlus,
   Users,
   Zap,
+  Trash2,
 } from "lucide-react-native";
 
 import { C } from "../constants/theme";
@@ -56,6 +57,7 @@ const ICONS = {
   userPlus: UserPlus,
   users: Users,
   zap: Zap,
+  trash: Trash2,
 };
 
 export default function AppIcon({

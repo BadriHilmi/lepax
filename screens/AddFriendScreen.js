@@ -10,6 +10,7 @@ import {
   Alert,
   ActivityIndicator,
   FlatList,
+  StatusBar,
 } from "react-native";
 import {
   collection,
@@ -21,7 +22,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { useAuth } from "../context/AuthContext";
-import { C, Typography } from "../constants/theme";
+import { C, Typography, Families, Brutalist } from "../constants/theme";
 import Avatar from "../components/Avatar";
 import AppIcon from "../components/AppIcon";
 
@@ -37,9 +38,11 @@ export default function AddFriendScreen({ navigation }) {
     setLoading(true);
     setResults([]);
     try {
+      const text = search.trim().toLowerCase();
       const q = query(
         collection(db, "users"),
-        where("username", "==", search.trim().toLowerCase())
+        where("username", ">=", text),
+        where("username", "<=", text + "\uf8ff")
       );
       const snap = await getDocs(q);
       const found = snap.docs
@@ -49,7 +52,7 @@ export default function AddFriendScreen({ navigation }) {
       if (!found.length)
         Alert.alert(
           "No results",
-          `No user found with username "${search.trim()}"`
+          `No user found starting with "${search.trim()}"`
         );
     } catch (err) {
       Alert.alert("Error", err.message);
@@ -213,13 +216,13 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === "ios" ? 56 : 20,
+    paddingTop: Platform.OS === "ios" ? 56 : (StatusBar.currentHeight || 0) + 12,
     paddingBottom: 12,
-    borderBottomWidth: 1,
-    borderColor: C.border,
+    borderBottomWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
   },
-  back: { fontSize: 15, color: C.primary, fontWeight: Typography.semibold },
-  navTitle: { fontSize: 15, fontWeight: Typography.bold, color: C.text },
+  back: { fontSize: 14, color: C.primary, fontFamily: Families.bold },
+  navTitle: { fontSize: 16, fontFamily: Families.display, color: C.text },
 
   searchRow: {
     flexDirection: "row",
@@ -230,20 +233,24 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     backgroundColor: C.surface,
-    borderWidth: 1,
-    borderColor: C.border,
-    borderRadius: 10,
+    borderWidth: 1.8,
+    borderColor: C.ink,
+    borderRadius: 6,
     padding: 13,
-    fontSize: 15,
+    fontSize: 14,
+    fontFamily: Families.medium,
     color: C.text,
   },
   searchBtn: {
     backgroundColor: C.primary,
     paddingHorizontal: 16,
-    borderRadius: 10,
+    borderRadius: 6,
+    borderWidth: 1.8,
+    borderColor: C.ink,
     justifyContent: "center",
     alignItems: "center",
     minWidth: 52,
+    ...Brutalist.btnShadow,
   },
   list: { paddingHorizontal: 20, paddingBottom: 60 },
   row: {
@@ -251,25 +258,32 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 14,
-    borderBottomWidth: 1,
+    borderBottomWidth: 1.2,
     borderColor: C.border,
   },
   rowLeft: { flexDirection: "row", alignItems: "center", gap: 12, flex: 1 },
-  rowName: { fontSize: 15, fontWeight: Typography.semibold, color: C.text },
-  rowBio: { fontSize: 12, color: C.muted, marginTop: 2, maxWidth: 180 },
+  rowName: { fontSize: 14, fontFamily: Families.bold, color: C.text },
+  rowBio: { fontSize: 12, fontFamily: Families.regular, color: C.muted, marginTop: 2, maxWidth: 180 },
 
   addBtn: {
-    borderWidth: 1,
-    borderColor: C.primary,
+    borderWidth: 1.8,
+    borderColor: C.ink,
+    backgroundColor: C.accent,
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: 6,
+    ...Brutalist.btnShadow,
   },
-  addBtnSent: { borderColor: C.border, backgroundColor: C.sand },
+  addBtnSent: {
+    borderColor: C.border,
+    backgroundColor: C.sand,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 0,
+  },
   addBtnText: {
-    fontSize: 13,
-    fontWeight: Typography.semibold,
-    color: C.primary,
+    fontSize: 12,
+    fontFamily: Families.bold,
+    color: C.surface,
   },
   addBtnTextSent: { color: C.muted },
 
@@ -279,12 +293,15 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: C.sand,
-    borderRadius: 8,
+    backgroundColor: C.surfaceWarm,
+    borderWidth: 1.5,
+    borderColor: C.ink,
+    borderRadius: 6,
+    transform: [{ rotate: "1deg" }],
   },
   friendTagText: {
-    fontSize: 13,
-    fontWeight: Typography.semibold,
+    fontSize: 12,
+    fontFamily: Families.bold,
     color: C.primary,
   },
 
@@ -292,12 +309,12 @@ const styles = StyleSheet.create({
   hintIcon: {
     width: 62,
     height: 62,
-    borderRadius: 18,
+    borderRadius: 10,
     backgroundColor: C.surfaceWarm,
-    borderWidth: 1,
-    borderColor: C.border,
+    borderWidth: Brutalist.borderWidth,
+    borderColor: Brutalist.borderColor,
     justifyContent: "center",
     alignItems: "center",
   },
-  hintText: { fontSize: 14, color: C.muted, textAlign: "center" },
+  hintText: { fontSize: 13, fontFamily: Families.medium, color: C.muted, textAlign: "center" },
 });
