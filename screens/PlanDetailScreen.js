@@ -436,8 +436,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  detailLabel: { fontSize: 13, fontFamily: Families.medium, color: C.muted, flex: 1 },
-  detailValue: { fontSize: 13, fontFamily: Families.bold, color: C.text },
+  detailLabel: { fontSize: 13, fontFamily: Families.medium, color: C.muted },
+  detailValue: { fontSize: 13, fontFamily: Families.bold, color: C.text, flex: 1, textAlign: "right" },
   divider: { height: 1.5, backgroundColor: C.ink, marginHorizontal: 14 },
 
   vibesRow: { flexDirection: "row", gap: 8, flexWrap: "wrap" },
